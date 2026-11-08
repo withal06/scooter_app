@@ -1,0 +1,95 @@
+- generic:
+  - generic:
+    - banner:
+      - generic:
+        - generic [aria-hidden]: 白
+        - generic:
+          - generic: 小白機車小幫手
+          - generic: RIDE CARE / YOUR SCOOTER
+      - generic:
+        - button:
+          - generic [aria-hidden]: ⇧
+          - text: 匯入 CSV
+        - button:
+          - generic [aria-hidden]: ⇩
+          - text: 匯出 CSV
+    - generic:
+      - main:
+        - generic:
+          - generic:
+            - generic: MY SCOOTER / 01
+            - heading [level=1]: 年度驗車記錄
+          - generic: 2026年11月8日週日
+        - navigation:
+          - button:
+            - text: 保養紀錄
+            - generic: "2"
+          - button:
+            - text: 年度驗車
+            - generic: "2"
+          - button:
+            - text: 車輛證件
+            - generic: "0"
+        - generic:
+          - generic:
+            - generic:
+              - generic: NEXT INSPECTION
+              - heading [level=2]: 2027/11/11
+              - paragraph: 年度定檢提醒 · 還有 368 天
+            - generic [aria-hidden]: 日
+          - generic:
+            - generic:
+              - heading [level=2]: 驗車時間軸
+              - paragraph: 依年份整理，記下每一次定期檢驗。
+            - button:
+              - generic [aria-hidden]: ＋
+              - text: 新增驗車
+          - generic:
+            - article:
+              - generic: 第二次 2027/11/11
+              - generic: 2027 年
+              - button: ✎
+              - button: ×
+            - article:
+              - generic: 第一次 2026/10/10
+              - generic: 2026 年
+              - button: ✎
+              - button: ×
+      - complementary:
+        - generic:
+          - generic:
+            - generic: 驗車提醒
+            - generic [aria-hidden]: ◷
+          - generic: 11/11
+          - generic: 2027 年驗車 · 還有 368 天
+          - generic: 還有 368 天
+        - generic:
+          - generic:
+            - generic: 車輛資訊
+            - generic [aria-hidden]: ＋
+          - generic:
+            - generic: 車名
+            - strong: 小白
+          - generic:
+            - generic: 最近保養
+            - strong: 03/10
+          - generic:
+            - generic: 保養次數
+            - strong: 2 次
+        - generic:
+          - generic:
+            - generic: 資料備份
+            - generic [aria-hidden]: ↗
+          - generic: 保養與驗車資料可用 CSV 一次備份或轉移。資料也會保存在此裝置的瀏覽器中。
+  - dialog [ref=e188]:
+    - generic [ref=e189]:
+      - heading "編輯驗車紀錄" [level=2] [ref=e190]
+      - button "關閉" [active] [ref=e191] [cursor=pointer]: ×
+    - generic [ref=e192]:
+      - generic [ref=e193]:
+        - generic [ref=e194]: 驗車日期
+        - textbox "驗車日期" [ref=e195]: 2027-11-11
+      - paragraph [ref=e196]: 新增後會依日期顯示下一次驗車提醒；若已排定明年日期，請直接記錄該日期。
+      - generic [ref=e197]:
+        - button "取消" [ref=e198] [cursor=pointer]
+        - button "儲存紀錄" [ref=e199] [cursor=pointer]

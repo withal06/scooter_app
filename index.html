@@ -99,9 +99,27 @@
     .inspect-banner h2 { margin: 7px 0 4px; font-size: 20px; }
     .inspect-banner p { margin: 0; color: #8c766b; font-size: 11px; }
     .calendar-mark { display: grid; width: 48px; height: 48px; flex: 0 0 48px; place-items: center; border-radius: 14px; background: var(--orange); color: white; font-family: 'DM Mono', monospace; font-size: 19px; font-weight: 500; }
-    .inspection-year { padding: 13px 17px; border-bottom: 1px solid var(--line); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; }
+    .inspection-year { display: flex; align-items: center; gap: 7px; padding: 8px 11px 8px 17px; border-bottom: 1px solid var(--line); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; }
     .inspection-year:last-child { border-bottom: 0; }
-    .inspection-year span { float: right; color: var(--green); font-family: 'Noto Sans TC', sans-serif; font-size: 11px; font-weight: 700; }
+    .inspection-year-label { flex: 1; }
+    .inspection-year-number { color: var(--green); font-family: 'Noto Sans TC', sans-serif; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .edit-button:hover { background: var(--mint); color: var(--green); }
+    .document-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .document-card { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
+    .document-card-head { display: flex; align-items: center; gap: 11px; margin-bottom: 16px; }
+    .document-icon { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; border-radius: 11px; background: var(--mint); color: var(--green); font-size: 18px; }
+    .document-card h2 { margin: 0; font-size: 14px; }
+    .document-card-head p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .document-preview { display: grid; min-height: 160px; align-content: center; justify-items: center; overflow: hidden; padding: 12px; border: 1px dashed #cbd6cc; border-radius: 9px; background: #f7f8f4; text-align: center; }
+    .document-preview.has-file { border-style: solid; background: #fff; }
+    .document-empty { color: var(--muted); font-size: 12px; }
+    .document-empty-symbol { display: block; margin-bottom: 9px; color: #9baa9c; font-size: 25px; }
+    .document-image { display: block; width: 100%; max-height: 210px; object-fit: contain; border-radius: 5px; }
+    .document-pdf-icon { display: grid; width: 54px; height: 64px; place-items: center; border: 1px solid #e8c9bd; border-radius: 7px; background: #fff3ee; color: #b75237; font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; }
+    .document-file-name { max-width: 100%; overflow: hidden; margin-top: 9px; color: var(--ink); font-size: 11px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .document-file-date { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .document-card-actions { display: flex; justify-content: flex-end; gap: 7px; margin-top: 12px; }
+    .document-private-note { margin: 14px 0 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
     .hidden { display: none !important; }
     .toast { position: fixed; z-index: 20; right: 24px; bottom: 24px; max-width: calc(100vw - 32px); padding: 12px 16px; border-radius: 9px; background: var(--ink); color: white; box-shadow: var(--shadow); font-size: 13px; animation: appear .2s ease both; }
     dialog { width: min(440px, calc(100vw - 28px)); padding: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--white); color: var(--ink); box-shadow: 0 24px 80px rgba(20, 35, 25, .24); }
@@ -142,6 +160,9 @@
       .next-date { font-size: 18px; }
       .tabs { width: 100%; }
       .tab { flex: 1; min-width: 0; }
+      .tab { gap: 5px; font-size: 11px; }
+      .tab-count { width: 18px; height: 18px; flex: 0 0 18px; }
+      .document-grid { grid-template-columns: minmax(0, 1fr); }
       .inspect-banner { padding: 16px; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
@@ -170,6 +191,7 @@
         <nav class="tabs" aria-label="主要頁面">
           <button class="tab active" data-tab="maintenance" aria-current="page">保養紀錄 <span class="tab-count" id="maintenanceCount">0</span></button>
           <button class="tab" data-tab="inspection">年度驗車 <span class="tab-count" id="inspectionCount">0</span></button>
+          <button class="tab" data-tab="documents">車輛證件 <span class="tab-count" id="documentCount">0</span></button>
         </nav>
 
         <section id="maintenancePage">
@@ -199,9 +221,26 @@
           </div>
           <div class="record-list" id="inspectionList"></div>
         </section>
+
+        <section id="documentsPage" class="hidden">
+          <div class="document-grid">
+            <article class="document-card" data-document-type="registration">
+              <div class="document-card-head"><div class="document-icon" aria-hidden="true">▤</div><div><h2>行照</h2></div></div>
+              <div class="document-preview" id="registrationPreview"><div class="document-empty"><span class="document-empty-symbol" aria-hidden="true">＋</span>尚未上傳行照</div></div>
+              <div class="document-card-actions"><button class="button primary small" data-upload-document="registration">＋ 上傳行照</button><button class="button danger small hidden" data-delete-document="registration">刪除</button></div>
+              <input class="hidden" id="registrationFile" type="file" accept="image/*,application/pdf">
+            </article>
+            <article class="document-card" data-document-type="license">
+              <div class="document-card-head"><div class="document-icon" aria-hidden="true">▤</div><div><h2>駕照</h2></div></div>
+              <div class="document-preview" id="licensePreview"><div class="document-empty"><span class="document-empty-symbol" aria-hidden="true">＋</span>尚未上傳駕照</div></div>
+              <div class="document-card-actions"><button class="button primary small" data-upload-document="license">＋ 上傳駕照</button><button class="button danger small hidden" data-delete-document="license">刪除</button></div>
+              <input class="hidden" id="licenseFile" type="file" accept="image/*,application/pdf">
+            </article>
+          </div>
+        </section>
       </main>
 
-      <aside class="sidebar" aria-label="車輛摘要">
+      <aside class="sidebar" id="homeSummary" aria-label="首頁車輛摘要">
         <section class="side-panel">
           <div class="side-title"><span>驗車提醒</span><span class="side-symbol" aria-hidden="true">◷</span></div>
           <div class="next-date" id="sideInspectionDate">尚未設定</div>
@@ -226,7 +265,7 @@
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <dialog id="maintenanceDialog">
-    <div class="dialog-head"><h2>新增保養紀錄</h2><button class="dialog-close" data-close="maintenanceDialog" aria-label="關閉">×</button></div>
+    <div class="dialog-head"><h2 id="maintenanceDialogTitle">新增保養紀錄</h2><button class="dialog-close" data-close="maintenanceDialog" aria-label="關閉">×</button></div>
     <form class="dialog-form" id="maintenanceForm">
       <div class="field"><label for="serviceDate">保養日期</label><input id="serviceDate" name="date" type="date" required></div>
       <div class="field"><label for="serviceMileage">總里程（公里）</label><input id="serviceMileage" name="odometer" type="number" min="0" step="1" placeholder="例如 3000" required></div>
@@ -236,7 +275,7 @@
   </dialog>
 
   <dialog id="inspectionDialog">
-    <div class="dialog-head"><h2>新增驗車紀錄</h2><button class="dialog-close" data-close="inspectionDialog" aria-label="關閉">×</button></div>
+    <div class="dialog-head"><h2 id="inspectionDialogTitle">新增驗車紀錄</h2><button class="dialog-close" data-close="inspectionDialog" aria-label="關閉">×</button></div>
     <form class="dialog-form" id="inspectionForm">
       <div class="field"><label for="inspectionDate">驗車日期</label><input id="inspectionDate" name="date" type="date" required></div>
       <p class="form-hint">新增後會依日期顯示下一次驗車提醒；若已排定明年日期，請直接記錄該日期。</p>
@@ -257,6 +296,7 @@
   <script>
     (() => {
       const STORAGE_KEY = 'scooter-helper-v1';
+      const DOCUMENT_DB = 'scooter-helper-documents-v1';
       const initialState = {
         vehicle: { name: '小白', plate: 'PAB-6992', mileage: 2000 },
         maintenance: [
@@ -271,6 +311,10 @@
       const numerals = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
       let state = loadState();
       let toastTimer;
+      let documentDbPromise;
+      let editingMaintenanceId = null;
+      let editingInspectionId = null;
+      const documentUrls = {};
 
       function loadState() {
         try {
@@ -347,12 +391,12 @@
           <article class="record" style="animation-delay:${index * 45}ms">
             <div class="record-index">${escapeHtml(item.sequence || ordinal(state.maintenance.indexOf(item)))}</div>
             <div><div class="record-title">${escapeHtml(item.content)}</div><div class="record-meta"><span>${formatDate(item.date)}</span><span>保養紀錄</span></div></div>
-            <div style="display:flex;align-items:center;gap:4px"><span class="record-distance">${Number(item.odometer).toLocaleString('en-US')} km</span><button class="delete-button" data-delete-maintenance="${escapeHtml(item.id)}" aria-label="刪除${escapeHtml(item.content)}" title="刪除紀錄">×</button></div>
+            <div style="display:flex;align-items:center;gap:4px"><span class="record-distance">${Number(item.odometer).toLocaleString('en-US')} km</span><button class="delete-button edit-button" data-edit-maintenance="${escapeHtml(item.id)}" aria-label="編輯${escapeHtml(item.content)}" title="編輯紀錄">✎</button><button class="delete-button" data-delete-maintenance="${escapeHtml(item.id)}" aria-label="刪除${escapeHtml(item.content)}" title="刪除紀錄">×</button></div>
           </article>`).join('') : '<div class="empty-state">目前還沒有保養紀錄，新增一筆開始追蹤。</div>';
 
         const inspectionList = document.getElementById('inspectionList');
         inspectionList.innerHTML = sortedInspections.length ? sortedInspections.map((item, index) => `
-          <article class="inspection-year" style="animation:appear .35s ease ${index * 45}ms both">${escapeHtml(item.sequence || ordinal(state.inspections.indexOf(item)))}　${formatDate(item.date)}<span>${parseDate(item.date).getFullYear()} 年</span><button class="delete-button" data-delete-inspection="${escapeHtml(item.id)}" aria-label="刪除驗車紀錄" title="刪除紀錄" style="float:right;width:26px;height:26px;margin-top:-5px">×</button></article>`).join('') : '<div class="empty-state">尚無驗車紀錄，新增日期以啟用提醒。</div>';
+          <article class="inspection-year" style="animation:appear .35s ease ${index * 45}ms both"><span class="inspection-year-label">${escapeHtml(item.sequence || ordinal(state.inspections.indexOf(item)))}　${formatDate(item.date)}</span><span class="inspection-year-number">${parseDate(item.date).getFullYear()} 年</span><button class="delete-button edit-button" data-edit-inspection="${escapeHtml(item.id)}" aria-label="編輯驗車紀錄" title="編輯紀錄" style="width:30px;height:30px">✎</button><button class="delete-button" data-delete-inspection="${escapeHtml(item.id)}" aria-label="刪除驗車紀錄" title="刪除紀錄" style="width:30px;height:30px">×</button></article>`).join('') : '<div class="empty-state">尚無驗車紀錄，新增日期以啟用提醒。</div>';
 
         const next = nextInspection();
         const dateLabel = next ? formatDate(next) : '尚未設定';
@@ -366,14 +410,22 @@
         document.querySelector('.reminder-state .dot').style.background = days !== null && days <= 30 ? '#e9784c' : '#74a982';
       }
 
-      function openDialog(id) {
+      function openDialog(id, recordId = null) {
         const dialog = document.getElementById(id);
         if (id === 'maintenanceDialog') {
-          document.getElementById('serviceDate').value = todayIso();
-          document.getElementById('serviceMileage').value = state.vehicle.mileage || '';
-          document.getElementById('serviceContent').value = '';
+          const record = state.maintenance.find(item => item.id === recordId);
+          editingMaintenanceId = record?.id || null;
+          document.getElementById('maintenanceDialogTitle').textContent = record ? '編輯保養紀錄' : '新增保養紀錄';
+          document.getElementById('serviceDate').value = record?.date || todayIso();
+          document.getElementById('serviceMileage').value = record?.odometer ?? state.vehicle.mileage ?? '';
+          document.getElementById('serviceContent').value = record?.content || '';
         }
-        if (id === 'inspectionDialog') document.getElementById('inspectionDate').value = todayIso();
+        if (id === 'inspectionDialog') {
+          const record = state.inspections.find(item => item.id === recordId);
+          editingInspectionId = record?.id || null;
+          document.getElementById('inspectionDialogTitle').textContent = record ? '編輯驗車紀錄' : '新增驗車紀錄';
+          document.getElementById('inspectionDate').value = record?.date || todayIso();
+        }
         if (id === 'vehicleDialog') {
           document.getElementById('vehicleName').value = state.vehicle.name;
           document.getElementById('vehiclePlate').value = state.vehicle.plate;
@@ -384,15 +436,97 @@
 
       function switchTab(tab) {
         const inspection = tab === 'inspection';
-        document.getElementById('maintenancePage').classList.toggle('hidden', inspection);
+        const documents = tab === 'documents';
+        document.getElementById('maintenancePage').classList.toggle('hidden', tab !== 'maintenance');
         document.getElementById('inspectionPage').classList.toggle('hidden', !inspection);
-        document.getElementById('pageTitle').textContent = inspection ? '年度驗車記錄' : '行車保養紀錄';
+        document.getElementById('documentsPage').classList.toggle('hidden', !documents);
+        document.getElementById('homeSummary').classList.toggle('hidden', tab !== 'maintenance');
+        document.getElementById('pageTitle').textContent = inspection ? '年度驗車記錄' : documents ? '車輛證件' : '行車保養紀錄';
         document.querySelectorAll('.tab').forEach(button => {
           const active = button.dataset.tab === tab;
           button.classList.toggle('active', active);
           if (active) button.setAttribute('aria-current', 'page');
           else button.removeAttribute('aria-current');
         });
+      }
+
+      function openDocumentDb() {
+        if (!documentDbPromise) {
+          documentDbPromise = new Promise((resolve, reject) => {
+            const request = indexedDB.open(DOCUMENT_DB, 1);
+            request.onupgradeneeded = () => request.result.createObjectStore('documents', { keyPath: 'type' });
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+          });
+        }
+        return documentDbPromise;
+      }
+
+      async function documentRequest(mode, operation) {
+        const db = await openDocumentDb();
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction('documents', mode);
+          const request = operation(transaction.objectStore('documents'));
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+          transaction.onerror = () => reject(transaction.error);
+        });
+      }
+
+      async function renderDocuments() {
+        try {
+          const documents = await documentRequest('readonly', store => store.getAll());
+          document.getElementById('documentCount').textContent = documents.length;
+          Object.values(documentUrls).forEach(url => URL.revokeObjectURL(url));
+          for (const key of Object.keys(documentUrls)) delete documentUrls[key];
+          documents.forEach(item => {
+            const preview = document.getElementById(`${item.type}Preview`);
+            const uploadButton = document.querySelector(`[data-upload-document="${item.type}"]`);
+            const deleteButton = document.querySelector(`[data-delete-document="${item.type}"]`);
+            if (!preview || !uploadButton || !deleteButton) return;
+            const url = URL.createObjectURL(item.file);
+            documentUrls[item.type] = url;
+            preview.classList.add('has-file');
+            if (item.file.type.startsWith('image/')) {
+              preview.innerHTML = `<img class="document-image" src="${url}" alt="${escapeHtml(item.label)}預覽"><div class="document-file-name">${escapeHtml(item.name)}</div><div class="document-file-date">已儲存在此裝置</div>`;
+            } else {
+              preview.innerHTML = `<a href="${url}" target="_blank" rel="noopener" aria-label="開啟${escapeHtml(item.label)} PDF"><span class="document-pdf-icon">PDF</span><span class="document-file-name">${escapeHtml(item.name)}</span></a><div class="document-file-date">已儲存在此裝置</div>`;
+            }
+            uploadButton.textContent = `↻ 更換${item.label}`;
+            deleteButton.classList.remove('hidden');
+          });
+          ['registration', 'license'].forEach(type => {
+            if (documents.some(item => item.type === type)) return;
+            const preview = document.getElementById(`${type}Preview`);
+            const label = type === 'registration' ? '行照' : '駕照';
+            preview.classList.remove('has-file');
+            preview.innerHTML = `<div class="document-empty"><span class="document-empty-symbol" aria-hidden="true">＋</span>尚未上傳${label}</div>`;
+            document.querySelector(`[data-upload-document="${type}"]`).textContent = `＋ 上傳${label}`;
+            document.querySelector(`[data-delete-document="${type}"]`).classList.add('hidden');
+          });
+        } catch (error) {
+          document.getElementById('documentCount').textContent = '！';
+          showToast('無法讀取證件資料，請確認瀏覽器儲存空間可用。');
+        }
+      }
+
+      async function saveDocument(type, file) {
+        if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
+          showToast('請選擇圖片或 PDF 檔案');
+          return;
+        }
+        const label = type === 'registration' ? '行照' : '駕照';
+        await documentRequest('readwrite', store => store.put({ type, label, name: file.name, file, updatedAt: new Date().toISOString() }));
+        await renderDocuments();
+        showToast(`${label}已儲存於此裝置`);
+      }
+
+      async function deleteDocument(type) {
+        const label = type === 'registration' ? '行照' : '駕照';
+        if (!confirm(`確定刪除已儲存的${label}？`)) return;
+        await documentRequest('readwrite', store => store.delete(type));
+        await renderDocuments();
+        showToast(`${label}已刪除`);
       }
 
       function csvCell(value) {
@@ -498,22 +632,50 @@
       document.getElementById('exportButton').addEventListener('click', exportCsv);
       document.getElementById('importButton').addEventListener('click', () => document.getElementById('fileInput').click());
       document.getElementById('fileInput').addEventListener('change', event => { if (event.target.files[0]) importCsv(event.target.files[0]); });
+      document.querySelectorAll('[data-upload-document]').forEach(button => button.addEventListener('click', () => {
+        document.getElementById(`${button.dataset.uploadDocument}File`).click();
+      }));
+      document.querySelectorAll('.document-card input[type="file"]').forEach(input => input.addEventListener('change', async event => {
+        const file = event.target.files[0];
+        if (!file) return;
+        try { await saveDocument(event.target.id === 'registrationFile' ? 'registration' : 'license', file); }
+        catch (error) { showToast('儲存失敗，請確認裝置儲存空間足夠。'); }
+        event.target.value = '';
+      }));
+      document.querySelectorAll('[data-delete-document]').forEach(button => button.addEventListener('click', async () => {
+        try { await deleteDocument(button.dataset.deleteDocument); }
+        catch (error) { showToast('刪除失敗，請稍後再試。'); }
+      }));
       document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.close).close()));
 
       document.getElementById('maintenanceForm').addEventListener('submit', event => {
         event.preventDefault();
         const form = new FormData(event.currentTarget);
         const odometer = Number(form.get('odometer'));
-        state.maintenance.push({ id: `m-${Date.now()}`, sequence: ordinal(state.maintenance.length), date: form.get('date'), odometer, content: String(form.get('content')).trim() });
+        const existing = state.maintenance.find(item => item.id === editingMaintenanceId);
+        const updatedRecord = {
+          id: existing?.id || `m-${Date.now()}`,
+          sequence: existing?.sequence || ordinal(state.maintenance.length),
+          date: form.get('date'),
+          odometer,
+          content: String(form.get('content')).trim()
+        };
+        if (existing) state.maintenance = state.maintenance.map(item => item.id === existing.id ? updatedRecord : item);
+        else state.maintenance.push(updatedRecord);
         state.vehicle.mileage = Math.max(Number(state.vehicle.mileage) || 0, odometer);
-        saveState(); render(); event.currentTarget.closest('dialog').close(); showToast('保養紀錄已儲存');
+        saveState(); render(); event.currentTarget.closest('dialog').close(); showToast(existing ? '保養紀錄已更新' : '保養紀錄已儲存');
+        editingMaintenanceId = null;
       });
 
       document.getElementById('inspectionForm').addEventListener('submit', event => {
         event.preventDefault();
         const date = new FormData(event.currentTarget).get('date');
-        state.inspections.push({ id: `i-${Date.now()}`, sequence: ordinal(state.inspections.length), date });
-        saveState(); render(); event.currentTarget.closest('dialog').close(); showToast('驗車日期已儲存');
+        const existing = state.inspections.find(item => item.id === editingInspectionId);
+        const updatedRecord = { id: existing?.id || `i-${Date.now()}`, sequence: existing?.sequence || ordinal(state.inspections.length), date };
+        if (existing) state.inspections = state.inspections.map(item => item.id === existing.id ? updatedRecord : item);
+        else state.inspections.push(updatedRecord);
+        saveState(); render(); event.currentTarget.closest('dialog').close(); showToast(existing ? '驗車紀錄已更新' : '驗車日期已儲存');
+        editingInspectionId = null;
       });
 
       document.getElementById('vehicleForm').addEventListener('submit', event => {
@@ -524,8 +686,12 @@
       });
 
       document.addEventListener('click', event => {
+        const maintenanceEditId = event.target.closest('[data-edit-maintenance]')?.dataset.editMaintenance;
+        const inspectionEditId = event.target.closest('[data-edit-inspection]')?.dataset.editInspection;
         const maintenanceId = event.target.closest('[data-delete-maintenance]')?.dataset.deleteMaintenance;
         const inspectionId = event.target.closest('[data-delete-inspection]')?.dataset.deleteInspection;
+        if (maintenanceEditId) openDialog('maintenanceDialog', maintenanceEditId);
+        if (inspectionEditId) openDialog('inspectionDialog', inspectionEditId);
         if (maintenanceId && confirm('確定刪除這筆保養紀錄？')) {
           state.maintenance = state.maintenance.filter(item => item.id !== maintenanceId);
           saveState(); render(); showToast('保養紀錄已刪除');
@@ -537,6 +703,7 @@
       });
 
       render();
+      renderDocuments();
     })();
   </script>
 </body>

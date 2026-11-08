@@ -1,0 +1,98 @@
+- generic [ref=f2e2]:
+  - banner [ref=f2e3]:
+    - generic [ref=f2e4]:
+      - generic [aria-hidden] [ref=f2e5]: 白
+      - generic [ref=f2e6]:
+        - generic [ref=f2e7]: 小白機車小幫手
+        - generic [ref=f2e8]: RIDE CARE / YOUR SCOOTER
+    - generic [ref=f2e9]:
+      - button "匯入 CSV" [ref=f2e10] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f2e11]: ⇧
+        - text: 匯入 CSV
+      - button "匯出 CSV" [ref=f2e12] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f2e13]: ⇩
+        - text: 匯出 CSV
+  - generic [ref=f2e14]:
+    - main [ref=f2e15]:
+      - generic [ref=f2e16]:
+        - generic [ref=f2e17]:
+          - generic [ref=f2e18]: MY SCOOTER / 01
+          - heading "行車保養紀錄" [level=1] [ref=f2e19]
+        - generic [ref=f2e20]: 2026年11月8日週日
+      - navigation "主要頁面" [ref=f2e21]:
+        - button "保養紀錄 2" [ref=f2e22] [cursor=pointer]:
+          - text: 保養紀錄
+          - generic [ref=f2e23]: "2"
+        - button "年度驗車 2" [ref=f2e24] [cursor=pointer]:
+          - text: 年度驗車
+          - generic [ref=f2e25]: "2"
+        - button "車輛證件 0" [ref=f2e26] [cursor=pointer]:
+          - text: 車輛證件
+          - generic [ref=f2e27]: "0"
+      - generic [ref=f2e28]:
+        - generic [ref=f2e29]:
+          - generic [ref=f2e30]:
+            - generic [ref=f2e31]: 目前總里程
+            - generic [ref=f2e32]: 車況已更新
+          - generic [ref=f2e34]:
+            - strong [ref=f2e35]: 2,000
+            - generic [ref=f2e36]: 公里
+          - generic [ref=f2e37]:
+            - generic [ref=f2e38]:
+              - generic [ref=f2e39]: LICENSE PLATE / 車牌
+              - generic [ref=f2e40]: PAB-6992
+            - button "編輯車輛" [ref=f2e41] [cursor=pointer]
+        - generic [ref=f2e42]:
+          - generic [ref=f2e43]:
+            - heading "保養紀錄" [level=2] [ref=f2e44]
+            - paragraph [ref=f2e45]: 每一次照顧，都替下一段路做好準備。
+          - button "新增保養" [ref=f2e46] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f2e47]: ＋
+            - text: 新增保養
+        - generic [ref=f2e48]:
+          - article [ref=f2e49]:
+            - generic [ref=f2e50]: 第二次
+            - generic [ref=f2e51]:
+              - generic [ref=f2e52]: 換機油與齒輪油
+              - generic [ref=f2e53]:
+                - generic [ref=f2e54]: 2026/03/10
+                - generic [ref=f2e55]: 保養紀錄
+            - generic [ref=f2e56]:
+              - generic [ref=f2e57]: 2,000 km
+              - button "刪除換機油與齒輪油" [ref=f2e58] [cursor=pointer]: ×
+          - article [ref=f2e59]:
+            - generic [ref=f2e60]: 第一次
+            - generic [ref=f2e61]:
+              - generic [ref=f2e62]: 換機油
+              - generic [ref=f2e63]:
+                - generic [ref=f2e64]: 2026/03/10
+                - generic [ref=f2e65]: 保養紀錄
+            - generic [ref=f2e66]:
+              - generic [ref=f2e67]: 1,000 km
+              - button "刪除換機油" [ref=f2e68] [cursor=pointer]: ×
+    - complementary "車輛摘要" [ref=f2e69]:
+      - generic [ref=f2e70]:
+        - generic [ref=f2e71]:
+          - generic [ref=f2e72]: 驗車提醒
+          - generic [aria-hidden] [ref=f2e73]: ◷
+        - generic [ref=f2e74]: 11/11
+        - generic [ref=f2e75]: 2027 年驗車 · 還有 368 天
+        - generic [ref=f2e76]: 還有 368 天
+      - generic [ref=f2e79]:
+        - generic [ref=f2e80]:
+          - generic [ref=f2e81]: 車輛資訊
+          - generic [aria-hidden] [ref=f2e82]: ＋
+        - generic [ref=f2e83]:
+          - generic [ref=f2e84]: 車名
+          - strong [ref=f2e85]: 小白
+        - generic [ref=f2e87]:
+          - generic [ref=f2e88]: 最近保養
+          - strong [ref=f2e89]: 03/10
+        - generic [ref=f2e91]:
+          - generic [ref=f2e92]: 保養次數
+          - strong [ref=f2e93]: 2 次
+      - generic [ref=f2e94]:
+        - generic [ref=f2e95]:
+          - generic [ref=f2e96]: 資料備份
+          - generic [aria-hidden] [ref=f2e97]: ↗
+        - generic [ref=f2e98]: 保養與驗車資料可用 CSV 一次備份或轉移。資料也會保存在此裝置的瀏覽器中。

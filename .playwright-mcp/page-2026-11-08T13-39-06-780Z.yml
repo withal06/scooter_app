@@ -1,0 +1,74 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [aria-hidden] [ref=e5]: 白
+      - generic [ref=e6]:
+        - generic [ref=e7]: 小白機車小幫手
+        - generic [ref=e8]: RIDE CARE / YOUR SCOOTER
+    - generic [ref=e9]:
+      - button "匯入 CSV" [ref=e10] [cursor=pointer]:
+        - generic [aria-hidden] [ref=e11]: ⇧
+        - text: 匯入 CSV
+      - button "匯出 CSV" [ref=e12] [cursor=pointer]:
+        - generic [aria-hidden] [ref=e13]: ⇩
+        - text: 匯出 CSV
+  - generic [ref=e14]:
+    - main [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]: MY SCOOTER / 01
+          - heading "車輛證件" [level=1] [ref=e284]
+        - generic [ref=e20]: 2026年11月8日週日
+      - navigation "主要頁面" [ref=e21]:
+        - button "保養紀錄 2" [ref=e22] [cursor=pointer]:
+          - text: 保養紀錄
+          - generic [ref=e23]: "2"
+        - button "年度驗車 2" [ref=e24] [cursor=pointer]:
+          - text: 年度驗車
+          - generic [ref=e25]: "2"
+        - button "車輛證件 0" [active] [ref=e26] [cursor=pointer]:
+          - text: 車輛證件
+          - generic [ref=e27]: "0"
+      - generic [ref=e286]:
+        - article [ref=e287]:
+          - generic [ref=e288]:
+            - generic [aria-hidden] [ref=e289]: ▤
+            - heading "行照" [level=2] [ref=e291]
+          - generic [ref=e293]:
+            - generic [aria-hidden] [ref=e294]: ＋
+            - text: 尚未上傳行照
+          - button "＋ 上傳行照" [ref=e296] [cursor=pointer]
+        - article [ref=e297]:
+          - generic [ref=e298]:
+            - generic [aria-hidden] [ref=e299]: ▤
+            - heading "駕照" [level=2] [ref=e301]
+          - generic [ref=e303]:
+            - generic [aria-hidden] [ref=e304]: ＋
+            - text: 尚未上傳駕照
+          - button "＋ 上傳駕照" [ref=e306] [cursor=pointer]
+    - complementary "車輛摘要" [ref=e71]:
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - generic [ref=e74]: 驗車提醒
+          - generic [aria-hidden] [ref=e75]: ◷
+        - generic [ref=e76]: 11/11
+        - generic [ref=e77]: 2027 年驗車 · 還有 368 天
+        - generic [ref=e78]: 還有 368 天
+      - generic [ref=e81]:
+        - generic [ref=e82]:
+          - generic [ref=e83]: 車輛資訊
+          - generic [aria-hidden] [ref=e84]: ＋
+        - generic [ref=e85]:
+          - generic [ref=e86]: 車名
+          - strong [ref=e87]: 小白
+        - generic [ref=e89]:
+          - generic [ref=e90]: 最近保養
+          - strong [ref=e91]: 03/10
+        - generic [ref=e93]:
+          - generic [ref=e94]: 保養次數
+          - strong [ref=e95]: 2 次
+      - generic [ref=e96]:
+        - generic [ref=e97]:
+          - generic [ref=e98]: 資料備份
+          - generic [aria-hidden] [ref=e99]: ↗
+        - generic [ref=e100]: 保養與驗車資料可用 CSV 一次備份或轉移。資料也會保存在此裝置的瀏覽器中。

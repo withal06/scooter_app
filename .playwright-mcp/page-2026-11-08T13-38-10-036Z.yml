@@ -1,0 +1,102 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [aria-hidden] [ref=e5]: 白
+        - generic [ref=e6]:
+          - generic [ref=e7]: 小白機車小幫手
+          - generic [ref=e8]: RIDE CARE / YOUR SCOOTER
+      - generic [ref=e9]:
+        - button "匯入 CSV" [ref=e10] [cursor=pointer]:
+          - generic [aria-hidden] [ref=e11]: ⇧
+          - text: 匯入 CSV
+        - button "匯出 CSV" [ref=e12] [cursor=pointer]:
+          - generic [aria-hidden] [ref=e13]: ⇩
+          - text: 匯出 CSV
+    - generic [ref=e14]:
+      - main [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - generic [ref=e18]: MY SCOOTER / 01
+            - heading "行車保養紀錄" [level=1] [ref=e19]
+          - generic [ref=e20]: 2026年11月8日週日
+        - navigation "主要頁面" [ref=e21]:
+          - button "保養紀錄 2" [ref=e22] [cursor=pointer]:
+            - text: 保養紀錄
+            - generic [ref=e23]: "2"
+          - button "年度驗車 2" [ref=e24] [cursor=pointer]:
+            - text: 年度驗車
+            - generic [ref=e25]: "2"
+          - button "車輛證件 0" [ref=e26] [cursor=pointer]:
+            - text: 車輛證件
+            - generic [ref=e27]: "0"
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - generic [ref=e30]:
+              - generic [ref=e31]: 目前總里程
+              - generic [ref=e32]: 車況已更新
+            - generic [ref=e34]:
+              - strong [ref=e35]: 2,100
+              - generic [ref=e36]: 公里
+            - generic [ref=e37]:
+              - generic [ref=e38]:
+                - generic [ref=e39]: LICENSE PLATE / 車牌
+                - generic [ref=e40]: PAB-6992
+              - button "編輯車輛" [ref=e41] [cursor=pointer]
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - heading "保養紀錄" [level=2] [ref=e44]
+              - paragraph [ref=e45]: 每一次照顧，都替下一段路做好準備。
+            - button "新增保養" [ref=e46] [cursor=pointer]:
+              - generic [aria-hidden] [ref=e47]: ＋
+              - text: 新增保養
+          - generic [ref=e48]:
+            - article [ref=e118]:
+              - generic [ref=e119]: 第二次
+              - generic [ref=e120]:
+                - generic [ref=e121]: 編輯功能測試
+                - generic [ref=e122]:
+                  - generic [ref=e123]: 2026/03/11
+                  - generic [ref=e124]: 保養紀錄
+              - generic [ref=e125]:
+                - generic [ref=e126]: 2,100 km
+                - button "編輯編輯功能測試" [ref=e127] [cursor=pointer]: ✎
+                - button "刪除編輯功能測試" [ref=e128] [cursor=pointer]: ×
+            - article [ref=e129]:
+              - generic [ref=e130]: 第一次
+              - generic [ref=e131]:
+                - generic [ref=e132]: 換機油
+                - generic [ref=e133]:
+                  - generic [ref=e134]: 2026/03/10
+                  - generic [ref=e135]: 保養紀錄
+              - generic [ref=e136]:
+                - generic [ref=e137]: 1,000 km
+                - button "編輯換機油" [ref=e138] [cursor=pointer]: ✎
+                - button "刪除換機油" [ref=e139] [cursor=pointer]: ×
+      - complementary "車輛摘要" [ref=e71]:
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - generic [ref=e74]: 驗車提醒
+            - generic [aria-hidden] [ref=e75]: ◷
+          - generic [ref=e76]: 11/11
+          - generic [ref=e77]: 2027 年驗車 · 還有 368 天
+          - generic [ref=e78]: 還有 368 天
+        - generic [ref=e81]:
+          - generic [ref=e82]:
+            - generic [ref=e83]: 車輛資訊
+            - generic [aria-hidden] [ref=e84]: ＋
+          - generic [ref=e85]:
+            - generic [ref=e86]: 車名
+            - strong [ref=e87]: 小白
+          - generic [ref=e89]:
+            - generic [ref=e90]: 最近保養
+            - strong [ref=e91]: 03/11
+          - generic [ref=e93]:
+            - generic [ref=e94]: 保養次數
+            - strong [ref=e95]: 2 次
+        - generic [ref=e96]:
+          - generic [ref=e97]:
+            - generic [ref=e98]: 資料備份
+            - generic [aria-hidden] [ref=e99]: ↗
+          - generic [ref=e100]: 保養與驗車資料可用 CSV 一次備份或轉移。資料也會保存在此裝置的瀏覽器中。
+  - status [ref=e140]: 保養紀錄已更新
