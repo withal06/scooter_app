@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f5ef">
+  <link rel="icon" href="data:,">
+  <title>小白｜機車小幫手</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      color-scheme: light;
+      --paper: #f3f5ef;
+      --white: #fffefa;
+      --ink: #202823;
+      --muted: #788078;
+      --line: #e2e7dd;
+      --green: #245c46;
+      --green-dark: #194533;
+      --mint: #dcebe1;
+      --orange: #e9784c;
+      --orange-soft: #fff0e8;
+      --yellow: #f1c96b;
+      --shadow: 0 18px 48px rgba(34, 57, 43, .08);
+      font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .shell { max-width: 1180px; min-height: 100vh; margin: 0 auto; padding: 28px 42px 44px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 32px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 13px; background: var(--green); color: #fff; font-size: 21px; font-weight: 800; }
+    .brand-name { font-size: 17px; font-weight: 800; line-height: 1.15; }
+    .brand-caption { margin-top: 3px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; }
+    .top-actions { display: flex; gap: 9px; }
+    .button { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 8px; padding: 0 14px; border: 1px solid var(--line); border-radius: 9px; background: var(--white); color: var(--ink); font-size: 13px; font-weight: 700; transition: background .18s, transform .18s, border-color .18s; }
+    .button:hover { transform: translateY(-1px); border-color: #b7c8ba; background: #fff; }
+    .button.primary { border-color: var(--green); background: var(--green); color: #fff; }
+    .button.primary:hover { background: var(--green-dark); }
+    .button.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+    .button.danger { border-color: #f1d8ce; color: #b75237; }
+    .button.small { min-height: 34px; padding: 0 10px; font-size: 12px; }
+    .button .icon { font-size: 16px; line-height: 1; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 286px; align-items: start; gap: 28px; }
+    .main-column { min-width: 0; }
+    .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 4px 0 22px; }
+    .eyebrow { color: var(--green); font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; }
+    h1 { margin: 7px 0 0; font-size: clamp(24px, 3vw, 32px); line-height: 1.2; letter-spacing: 0; }
+    .date-stamp { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; white-space: nowrap; }
+    .tabs { display: flex; width: fit-content; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 11px; background: #e9ede6; margin-bottom: 18px; }
+    .tab { display: inline-flex; min-width: 112px; min-height: 38px; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .tab.active { background: var(--white); color: var(--green); box-shadow: 0 2px 6px rgba(32, 40, 35, .08); }
+    .tab-count { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 6px; background: var(--mint); font-family: 'DM Mono', monospace; font-size: 10px; }
+    .hero { position: relative; overflow: hidden; min-height: 250px; padding: 27px 30px; border-radius: 15px; background: var(--green); color: white; box-shadow: var(--shadow); }
+    .hero::after { position: absolute; right: -67px; bottom: -132px; width: 310px; height: 310px; border: 1px solid rgba(255,255,255,.15); border-radius: 50%; box-shadow: 0 0 0 25px rgba(255,255,255,.035), 0 0 0 54px rgba(255,255,255,.03); content: ''; pointer-events: none; }
+    .hero-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .hero-label { color: #c3d6c9; font-size: 12px; font-weight: 600; }
+    .live-pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 9px; border: 1px solid rgba(255,255,255,.22); border-radius: 20px; color: #e5eee7; font-size: 10px; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #98d7a4; }
+    .odometer { display: flex; align-items: baseline; gap: 9px; margin: 28px 0 8px; }
+    .odometer strong { font-family: 'DM Mono', monospace; font-size: clamp(46px, 7vw, 64px); font-weight: 500; line-height: 1; letter-spacing: 0; }
+    .odometer span { color: #c3d6c9; font-size: 15px; }
+    .hero-bottom { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-top: 26px; }
+    .plate-label { margin-bottom: 7px; color: #c3d6c9; font-size: 10px; letter-spacing: 1.2px; }
+    .plate { display: inline-block; padding: 6px 11px 5px; border: 2px solid rgba(255,255,255,.8); border-radius: 5px; background: #f8f6e9; color: #27322b; font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; letter-spacing: 1.3px; }
+    .hero-edit { border-color: rgba(255,255,255,.3); background: transparent; color: white; }
+    .hero-edit:hover { border-color: rgba(255,255,255,.7); background: rgba(255,255,255,.08); }
+    .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 29px 0 13px; }
+    .section-heading h2 { margin: 0; font-size: 16px; }
+    .section-heading p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+    .record-list { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
+    .record { display: grid; grid-template-columns: 45px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 15px 17px; border-bottom: 1px solid var(--line); animation: appear .35s ease both; }
+    .record:last-child { border-bottom: 0; }
+    .record-index { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 11px; background: #edf3ee; color: var(--green); font-family: 'DM Mono', monospace; font-size: 11px; }
+    .record-title { font-size: 13px; font-weight: 700; }
+    .record-meta { display: flex; flex-wrap: wrap; gap: 7px 11px; margin-top: 5px; color: var(--muted); font-size: 11px; }
+    .record-distance { color: var(--green); font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; white-space: nowrap; }
+    .delete-button { display: grid; width: 34px; height: 34px; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #9ba29a; font-size: 17px; }
+    .delete-button:hover { background: var(--orange-soft); color: #b75237; }
+    .empty-state { padding: 28px 18px; color: var(--muted); font-size: 13px; text-align: center; }
+    .sidebar { display: grid; gap: 14px; padding-top: 78px; }
+    .side-panel { padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
+    .side-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 15px; font-size: 12px; font-weight: 800; }
+    .side-symbol { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px; background: var(--mint); color: var(--green); font-size: 15px; }
+    .next-date { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; }
+    .next-caption { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .reminder-state { display: flex; align-items: center; gap: 8px; margin-top: 15px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--green); font-size: 11px; font-weight: 700; }
+    .reminder-state .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
+    .side-rule { height: 1px; margin: 14px 0; background: var(--line); }
+    .side-row { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 11px; }
+    .side-row strong { color: var(--ink); font-weight: 700; }
+    .info-note { color: var(--muted); font-size: 11px; line-height: 1.65; }
+    .inspect-banner { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 16px; padding: 20px; border: 1px solid #f4d9c9; border-radius: 12px; background: #fff6ef; }
+    .inspect-banner .eyebrow { color: #a55031; }
+    .inspect-banner h2 { margin: 7px 0 4px; font-size: 20px; }
+    .inspect-banner p { margin: 0; color: #8c766b; font-size: 11px; }
+    .calendar-mark { display: grid; width: 48px; height: 48px; flex: 0 0 48px; place-items: center; border-radius: 14px; background: var(--orange); color: white; font-family: 'DM Mono', monospace; font-size: 19px; font-weight: 500; }
+    .inspection-year { padding: 13px 17px; border-bottom: 1px solid var(--line); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; }
+    .inspection-year:last-child { border-bottom: 0; }
+    .inspection-year span { float: right; color: var(--green); font-family: 'Noto Sans TC', sans-serif; font-size: 11px; font-weight: 700; }
+    .hidden { display: none !important; }
+    .toast { position: fixed; z-index: 20; right: 24px; bottom: 24px; max-width: calc(100vw - 32px); padding: 12px 16px; border-radius: 9px; background: var(--ink); color: white; box-shadow: var(--shadow); font-size: 13px; animation: appear .2s ease both; }
+    dialog { width: min(440px, calc(100vw - 28px)); padding: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--white); color: var(--ink); box-shadow: 0 24px 80px rgba(20, 35, 25, .24); }
+    dialog::backdrop { background: rgba(24, 35, 28, .42); backdrop-filter: blur(3px); }
+    .dialog-head { display: flex; align-items: center; justify-content: space-between; padding: 19px 21px 15px; border-bottom: 1px solid var(--line); }
+    .dialog-head h2 { margin: 0; font-size: 17px; }
+    .dialog-close { width: 30px; height: 30px; border: 0; border-radius: 8px; background: #f0f2ed; color: var(--muted); font-size: 19px; }
+    .dialog-form { display: grid; gap: 14px; padding: 19px 21px 21px; }
+    .field { display: grid; gap: 6px; }
+    .field label { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .field input { width: 100%; height: 42px; padding: 0 11px; border: 1px solid var(--line); border-radius: 8px; outline: 0; background: #fff; color: var(--ink); font-size: 13px; }
+    .field input:focus { border-color: #8cae95; box-shadow: 0 0 0 3px rgba(36, 92, 70, .1); }
+    .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+    .form-hint { margin: -5px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 760px) {
+      .shell { padding: 18px 17px 32px; }
+      .topbar { margin-bottom: 25px; }
+      .top-actions .button { width: 40px; min-width: 40px; padding: 0; font-size: 0; }
+      .top-actions .button .icon { font-size: 17px; }
+      .layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      .sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-top: 22px; }
+      .side-panel { padding: 15px; }
+      .page-heading { margin-top: 0; }
+    }
+    @media (max-width: 430px) {
+      .brand-mark { width: 38px; height: 38px; }
+      .brand-caption { font-size: 9px; }
+      .page-heading { align-items: flex-start; flex-direction: column; gap: 8px; }
+      .date-stamp { font-size: 10px; }
+      .hero { min-height: 231px; padding: 22px; }
+      .record { grid-template-columns: 39px minmax(0, 1fr) auto; gap: 10px; padding: 13px 11px; }
+      .record-index { width: 37px; height: 37px; }
+      .record-meta { gap: 4px 8px; font-size: 10px; }
+      .record-distance { font-size: 11px; }
+      .sidebar { gap: 9px; }
+      .side-title { font-size: 11px; }
+      .next-date { font-size: 18px; }
+      .tabs { width: 100%; }
+      .tab { flex: 1; min-width: 0; }
+      .inspect-banner { padding: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">白</div>
+        <div><div class="brand-name">小白機車小幫手</div><div class="brand-caption">RIDE CARE / YOUR SCOOTER</div></div>
+      </div>
+      <div class="top-actions">
+        <button class="button" id="importButton" title="匯入 CSV"><span class="icon" aria-hidden="true">⇧</span>匯入 CSV</button>
+        <button class="button" id="exportButton" title="匯出 CSV"><span class="icon" aria-hidden="true">⇩</span>匯出 CSV</button>
+        <input id="fileInput" class="hidden" type="file" accept=".csv,text/csv">
+      </div>
+    </header>
+
+    <div class="layout">
+      <main class="main-column">
+        <div class="page-heading">
+          <div><div class="eyebrow">MY SCOOTER / 01</div><h1 id="pageTitle">行車保養紀錄</h1></div>
+          <div class="date-stamp" id="todayStamp"></div>
+        </div>
+        <nav class="tabs" aria-label="主要頁面">
+          <button class="tab active" data-tab="maintenance" aria-current="page">保養紀錄 <span class="tab-count" id="maintenanceCount">0</span></button>
+          <button class="tab" data-tab="inspection">年度驗車 <span class="tab-count" id="inspectionCount">0</span></button>
+        </nav>
+
+        <section id="maintenancePage">
+          <div class="hero">
+            <div class="hero-top"><div class="hero-label">目前總里程</div><div class="live-pill"><span class="live-dot"></span>車況已更新</div></div>
+            <div class="odometer"><strong id="mileageValue">2,000</strong><span>公里</span></div>
+            <div class="hero-bottom">
+              <div><div class="plate-label">LICENSE PLATE / 車牌</div><div class="plate" id="plateValue">PAB-6992</div></div>
+              <button class="button hero-edit small" id="editVehicleButton">編輯車輛</button>
+            </div>
+          </div>
+          <div class="section-heading">
+            <div><h2>保養紀錄</h2><p>每一次照顧，都替下一段路做好準備。</p></div>
+            <button class="button primary small" id="addMaintenanceButton"><span class="icon" aria-hidden="true">＋</span>新增保養</button>
+          </div>
+          <div class="record-list" id="maintenanceList"></div>
+        </section>
+
+        <section id="inspectionPage" class="hidden">
+          <div class="inspect-banner">
+            <div><div class="eyebrow">NEXT INSPECTION</div><h2 id="nextInspectionDate">尚未設定</h2><p id="nextInspectionHint">新增驗車日期，開始追蹤年度提醒。</p></div>
+            <div class="calendar-mark" aria-hidden="true">日</div>
+          </div>
+          <div class="section-heading">
+            <div><h2>驗車時間軸</h2><p>依年份整理，記下每一次定期檢驗。</p></div>
+            <button class="button primary small" id="addInspectionButton"><span class="icon" aria-hidden="true">＋</span>新增驗車</button>
+          </div>
+          <div class="record-list" id="inspectionList"></div>
+        </section>
+      </main>
+
+      <aside class="sidebar" aria-label="車輛摘要">
+        <section class="side-panel">
+          <div class="side-title"><span>驗車提醒</span><span class="side-symbol" aria-hidden="true">◷</span></div>
+          <div class="next-date" id="sideInspectionDate">尚未設定</div>
+          <div class="next-caption" id="sideInspectionCaption">新增驗車日期以建立提醒</div>
+          <div class="reminder-state"><span class="dot"></span><span id="reminderStatus">提醒追蹤中</span></div>
+        </section>
+        <section class="side-panel">
+          <div class="side-title"><span>車輛資訊</span><span class="side-symbol" aria-hidden="true">＋</span></div>
+          <div class="side-row"><span>車名</span><strong id="vehicleNameValue">小白</strong></div>
+          <div class="side-rule"></div>
+          <div class="side-row"><span>最近保養</span><strong id="lastServiceValue">尚無紀錄</strong></div>
+          <div class="side-rule"></div>
+          <div class="side-row"><span>保養次數</span><strong id="serviceCountValue">0 次</strong></div>
+        </section>
+        <section class="side-panel">
+          <div class="side-title"><span>資料備份</span><span class="side-symbol" aria-hidden="true">↗</span></div>
+          <div class="info-note">保養與驗車資料可用 CSV 一次備份或轉移。資料也會保存在此裝置的瀏覽器中。</div>
+        </section>
+      </aside>
+    </div>
+  </div>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <dialog id="maintenanceDialog">
+    <div class="dialog-head"><h2>新增保養紀錄</h2><button class="dialog-close" data-close="maintenanceDialog" aria-label="關閉">×</button></div>
+    <form class="dialog-form" id="maintenanceForm">
+      <div class="field"><label for="serviceDate">保養日期</label><input id="serviceDate" name="date" type="date" required></div>
+      <div class="field"><label for="serviceMileage">總里程（公里）</label><input id="serviceMileage" name="odometer" type="number" min="0" step="1" placeholder="例如 3000" required></div>
+      <div class="field"><label for="serviceContent">保養內容</label><input id="serviceContent" name="content" type="text" maxlength="120" placeholder="例如：更換機油" required></div>
+      <div class="form-actions"><button class="button" type="button" data-close="maintenanceDialog">取消</button><button class="button primary" type="submit">儲存紀錄</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="inspectionDialog">
+    <div class="dialog-head"><h2>新增驗車紀錄</h2><button class="dialog-close" data-close="inspectionDialog" aria-label="關閉">×</button></div>
+    <form class="dialog-form" id="inspectionForm">
+      <div class="field"><label for="inspectionDate">驗車日期</label><input id="inspectionDate" name="date" type="date" required></div>
+      <p class="form-hint">新增後會依日期顯示下一次驗車提醒；若已排定明年日期，請直接記錄該日期。</p>
+      <div class="form-actions"><button class="button" type="button" data-close="inspectionDialog">取消</button><button class="button primary" type="submit">儲存紀錄</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="vehicleDialog">
+    <div class="dialog-head"><h2>編輯車輛資訊</h2><button class="dialog-close" data-close="vehicleDialog" aria-label="關閉">×</button></div>
+    <form class="dialog-form" id="vehicleForm">
+      <div class="field"><label for="vehicleName">車名</label><input id="vehicleName" name="name" type="text" maxlength="40" required></div>
+      <div class="field"><label for="vehiclePlate">車牌</label><input id="vehiclePlate" name="plate" type="text" maxlength="20" required></div>
+      <div class="field"><label for="vehicleMileage">目前里程（公里）</label><input id="vehicleMileage" name="mileage" type="number" min="0" step="1" required></div>
+      <div class="form-actions"><button class="button" type="button" data-close="vehicleDialog">取消</button><button class="button primary" type="submit">儲存變更</button></div>
+    </form>
+  </dialog>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = 'scooter-helper-v1';
+      const initialState = {
+        vehicle: { name: '小白', plate: 'PAB-6992', mileage: 2000 },
+        maintenance: [
+          { id: 'm-1', sequence: '第一次', date: '2026-03-10', odometer: 1000, content: '換機油' },
+          { id: 'm-2', sequence: '第二次', date: '2026-03-10', odometer: 2000, content: '換機油與齒輪油' }
+        ],
+        inspections: [
+          { id: 'i-1', sequence: '第一次', date: '2026-10-10' },
+          { id: 'i-2', sequence: '第二次', date: '2027-11-11' }
+        ]
+      };
+      const numerals = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+      let state = loadState();
+      let toastTimer;
+
+      function loadState() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (saved && saved.vehicle && Array.isArray(saved.maintenance) && Array.isArray(saved.inspections)) return saved;
+        } catch (error) { console.warn('無法讀取本機資料，使用預設內容。', error); }
+        return structuredClone(initialState);
+      }
+
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+      }
+
+      function ordinal(index) {
+        return index < numerals.length ? `第${numerals[index]}次` : `第${index + 1}次`;
+      }
+
+      function parseDate(value) {
+        const [year, month, day] = String(value).split('-').map(Number);
+        return new Date(year, month - 1, day);
+      }
+
+      function formatDate(value, year = true) {
+        if (!value) return '尚未設定';
+        const date = parseDate(value);
+        if (Number.isNaN(date.getTime())) return escapeHtml(value);
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return year ? `${date.getFullYear()}/${month}/${day}` : `${month}/${day}`;
+      }
+
+      function todayIso() {
+        const date = new Date();
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      }
+
+      function nextInspection() {
+        if (!state.inspections.length) return null;
+        const today = parseDate(todayIso());
+        const dates = state.inspections.map(item => item.date).filter(Boolean).sort();
+        const upcoming = dates.find(date => parseDate(date) >= today);
+        if (upcoming) return upcoming;
+        const last = parseDate(dates[dates.length - 1]);
+        last.setFullYear(last.getFullYear() + 1);
+        return `${last.getFullYear()}-${String(last.getMonth() + 1).padStart(2, '0')}-${String(last.getDate()).padStart(2, '0')}`;
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.add('hidden'), 2600);
+      }
+
+      function render() {
+        const sortedMaintenance = [...state.maintenance].sort((a, b) => b.date.localeCompare(a.date) || b.odometer - a.odometer);
+        const sortedInspections = [...state.inspections].sort((a, b) => b.date.localeCompare(a.date));
+        document.getElementById('maintenanceCount').textContent = state.maintenance.length;
+        document.getElementById('inspectionCount').textContent = state.inspections.length;
+        document.getElementById('mileageValue').textContent = Number(state.vehicle.mileage || 0).toLocaleString('en-US');
+        document.getElementById('plateValue').textContent = state.vehicle.plate;
+        document.getElementById('vehicleNameValue').textContent = state.vehicle.name;
+        document.getElementById('serviceCountValue').textContent = `${state.maintenance.length} 次`;
+        document.getElementById('lastServiceValue').textContent = sortedMaintenance.length ? formatDate(sortedMaintenance[0].date, false) : '尚無紀錄';
+        document.getElementById('todayStamp').textContent = new Intl.DateTimeFormat('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }).format(new Date());
+
+        const maintenanceList = document.getElementById('maintenanceList');
+        maintenanceList.innerHTML = sortedMaintenance.length ? sortedMaintenance.map((item, index) => `
+          <article class="record" style="animation-delay:${index * 45}ms">
+            <div class="record-index">${escapeHtml(item.sequence || ordinal(state.maintenance.indexOf(item)))}</div>
+            <div><div class="record-title">${escapeHtml(item.content)}</div><div class="record-meta"><span>${formatDate(item.date)}</span><span>保養紀錄</span></div></div>
+            <div style="display:flex;align-items:center;gap:4px"><span class="record-distance">${Number(item.odometer).toLocaleString('en-US')} km</span><button class="delete-button" data-delete-maintenance="${escapeHtml(item.id)}" aria-label="刪除${escapeHtml(item.content)}" title="刪除紀錄">×</button></div>
+          </article>`).join('') : '<div class="empty-state">目前還沒有保養紀錄，新增一筆開始追蹤。</div>';
+
+        const inspectionList = document.getElementById('inspectionList');
+        inspectionList.innerHTML = sortedInspections.length ? sortedInspections.map((item, index) => `
+          <article class="inspection-year" style="animation:appear .35s ease ${index * 45}ms both">${escapeHtml(item.sequence || ordinal(state.inspections.indexOf(item)))}　${formatDate(item.date)}<span>${parseDate(item.date).getFullYear()} 年</span><button class="delete-button" data-delete-inspection="${escapeHtml(item.id)}" aria-label="刪除驗車紀錄" title="刪除紀錄" style="float:right;width:26px;height:26px;margin-top:-5px">×</button></article>`).join('') : '<div class="empty-state">尚無驗車紀錄，新增日期以啟用提醒。</div>';
+
+        const next = nextInspection();
+        const dateLabel = next ? formatDate(next) : '尚未設定';
+        const days = next ? Math.ceil((parseDate(next) - parseDate(todayIso())) / 86400000) : null;
+        const reminder = !next ? '等待新增驗車日期' : days < 0 ? `已逾期 ${Math.abs(days)} 天` : days === 0 ? '今天驗車' : `還有 ${days} 天`;
+        document.getElementById('nextInspectionDate').textContent = dateLabel;
+        document.getElementById('nextInspectionHint').textContent = next ? (days < 0 ? '請盡快安排定期檢驗。' : `年度定檢提醒 · ${reminder}`) : '新增驗車日期，開始追蹤年度提醒。';
+        document.getElementById('sideInspectionDate').textContent = next ? formatDate(next, false) : '尚未設定';
+        document.getElementById('sideInspectionCaption').textContent = next ? `${parseDate(next).getFullYear()} 年驗車 · ${reminder}` : '新增驗車日期以建立提醒';
+        document.getElementById('reminderStatus').textContent = reminder;
+        document.querySelector('.reminder-state .dot').style.background = days !== null && days <= 30 ? '#e9784c' : '#74a982';
+      }
+
+      function openDialog(id) {
+        const dialog = document.getElementById(id);
+        if (id === 'maintenanceDialog') {
+          document.getElementById('serviceDate').value = todayIso();
+          document.getElementById('serviceMileage').value = state.vehicle.mileage || '';
+          document.getElementById('serviceContent').value = '';
+        }
+        if (id === 'inspectionDialog') document.getElementById('inspectionDate').value = todayIso();
+        if (id === 'vehicleDialog') {
+          document.getElementById('vehicleName').value = state.vehicle.name;
+          document.getElementById('vehiclePlate').value = state.vehicle.plate;
+          document.getElementById('vehicleMileage').value = state.vehicle.mileage;
+        }
+        dialog.showModal();
+      }
+
+      function switchTab(tab) {
+        const inspection = tab === 'inspection';
+        document.getElementById('maintenancePage').classList.toggle('hidden', inspection);
+        document.getElementById('inspectionPage').classList.toggle('hidden', !inspection);
+        document.getElementById('pageTitle').textContent = inspection ? '年度驗車記錄' : '行車保養紀錄';
+        document.querySelectorAll('.tab').forEach(button => {
+          const active = button.dataset.tab === tab;
+          button.classList.toggle('active', active);
+          if (active) button.setAttribute('aria-current', 'page');
+          else button.removeAttribute('aria-current');
+        });
+      }
+
+      function csvCell(value) {
+        const text = String(value ?? '');
+        return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+      }
+
+      function exportCsv() {
+        const rows = [['類型', '車名', '車牌', '次數', '日期', '總里程(公里)', '保養內容', '目前里程(公里)']];
+        state.maintenance.forEach(item => rows.push(['保養', state.vehicle.name, state.vehicle.plate, item.sequence, item.date.replace(/-/g, '/'), item.odometer, item.content, state.vehicle.mileage]));
+        state.inspections.forEach(item => rows.push(['驗車', state.vehicle.name, state.vehicle.plate, item.sequence, item.date.replace(/-/g, '/'), '', '', state.vehicle.mileage]));
+        const csv = '\ufeff' + rows.map(row => row.map(csvCell).join(',')).join('\r\n');
+        const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `小白機車紀錄_${todayIso()}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+        showToast('CSV 已匯出');
+      }
+
+      function parseCsv(text) {
+        const rows = [];
+        let row = [];
+        let cell = '';
+        let quoted = false;
+        const input = text.replace(/^\ufeff/, '');
+        for (let index = 0; index < input.length; index += 1) {
+          const character = input[index];
+          if (quoted) {
+            if (character === '"' && input[index + 1] === '"') { cell += '"'; index += 1; }
+            else if (character === '"') quoted = false;
+            else cell += character;
+          } else if (character === '"') quoted = true;
+          else if (character === ',') { row.push(cell); cell = ''; }
+          else if (character === '\n' || character === '\r') {
+            if (character === '\r' && input[index + 1] === '\n') index += 1;
+            row.push(cell); cell = '';
+            if (row.some(value => value.trim())) rows.push(row);
+            row = [];
+          } else cell += character;
+        }
+        row.push(cell);
+        if (row.some(value => value.trim())) rows.push(row);
+        return rows;
+      }
+
+      function normalizeDate(value) {
+        const match = String(value).trim().match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$/);
+        if (!match) return '';
+        const [, year, month, day] = match;
+        const date = new Date(Number(year), Number(month) - 1, Number(day));
+        if (date.getFullYear() !== Number(year) || date.getMonth() !== Number(month) - 1 || date.getDate() !== Number(day)) return '';
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      }
+
+      async function importCsv(file) {
+        try {
+          const rows = parseCsv(await file.text());
+          const header = rows.shift()?.map(value => value.trim());
+          const required = ['類型', '車名', '車牌', '次數', '日期', '總里程(公里)', '保養內容'];
+          if (!header || required.some((name, index) => header[index] !== name) || (header.length > 7 && header[7] !== '目前里程(公里)')) throw new Error('CSV 欄位不符合格式');
+          if (!rows.length) throw new Error('CSV 沒有任何資料');
+          const vehicle = { name: '', plate: '', mileage: 0 };
+          const maintenance = [];
+          const inspections = [];
+          rows.forEach((row, index) => {
+            const [type, name, plate, sequence, rawDate, rawMileage, content, rawCurrentMileage] = row;
+            const date = normalizeDate(rawDate);
+            if (!date || !name?.trim() || !plate?.trim()) throw new Error(`第 ${index + 2} 列資料不完整`);
+            vehicle.name = name.trim();
+            vehicle.plate = plate.trim();
+            if (rawCurrentMileage?.trim()) {
+              const currentMileage = Number(rawCurrentMileage);
+              if (!Number.isFinite(currentMileage) || currentMileage < 0) throw new Error(`第 ${index + 2} 列目前里程錯誤`);
+              vehicle.mileage = Math.max(vehicle.mileage, currentMileage);
+            }
+            if (type === '保養') {
+              const odometer = Number(rawMileage);
+              if (!Number.isFinite(odometer) || odometer < 0 || !content?.trim()) throw new Error(`第 ${index + 2} 列保養資料錯誤`);
+              maintenance.push({ id: `m-${Date.now()}-${index}`, sequence: sequence?.trim() || ordinal(maintenance.length), date, odometer, content: content.trim() });
+              vehicle.mileage = Math.max(vehicle.mileage, odometer);
+            } else if (type === '驗車') inspections.push({ id: `i-${Date.now()}-${index}`, sequence: sequence?.trim() || ordinal(inspections.length), date });
+            else throw new Error(`第 ${index + 2} 列類型必須是「保養」或「驗車」`);
+          });
+          if (!vehicle.name || !vehicle.plate) throw new Error('找不到車輛資訊');
+          if (!confirm('匯入會取代目前所有保養與驗車紀錄，確定繼續嗎？')) return;
+          state = { vehicle, maintenance, inspections };
+          saveState();
+          render();
+          showToast('CSV 匯入完成');
+        } catch (error) {
+          showToast(error.message || 'CSV 匯入失敗');
+        } finally {
+          document.getElementById('fileInput').value = '';
+        }
+      }
+
+      document.querySelectorAll('.tab').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.tab)));
+      document.getElementById('addMaintenanceButton').addEventListener('click', () => openDialog('maintenanceDialog'));
+      document.getElementById('addInspectionButton').addEventListener('click', () => openDialog('inspectionDialog'));
+      document.getElementById('editVehicleButton').addEventListener('click', () => openDialog('vehicleDialog'));
+      document.getElementById('exportButton').addEventListener('click', exportCsv);
+      document.getElementById('importButton').addEventListener('click', () => document.getElementById('fileInput').click());
+      document.getElementById('fileInput').addEventListener('change', event => { if (event.target.files[0]) importCsv(event.target.files[0]); });
+      document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.close).close()));
+
+      document.getElementById('maintenanceForm').addEventListener('submit', event => {
+        event.preventDefault();
+        const form = new FormData(event.currentTarget);
+        const odometer = Number(form.get('odometer'));
+        state.maintenance.push({ id: `m-${Date.now()}`, sequence: ordinal(state.maintenance.length), date: form.get('date'), odometer, content: String(form.get('content')).trim() });
+        state.vehicle.mileage = Math.max(Number(state.vehicle.mileage) || 0, odometer);
+        saveState(); render(); event.currentTarget.closest('dialog').close(); showToast('保養紀錄已儲存');
+      });
+
+      document.getElementById('inspectionForm').addEventListener('submit', event => {
+        event.preventDefault();
+        const date = new FormData(event.currentTarget).get('date');
+        state.inspections.push({ id: `i-${Date.now()}`, sequence: ordinal(state.inspections.length), date });
+        saveState(); render(); event.currentTarget.closest('dialog').close(); showToast('驗車日期已儲存');
+      });
+
+      document.getElementById('vehicleForm').addEventListener('submit', event => {
+        event.preventDefault();
+        const form = new FormData(event.currentTarget);
+        state.vehicle = { name: String(form.get('name')).trim(), plate: String(form.get('plate')).trim(), mileage: Number(form.get('mileage')) };
+        saveState(); render(); event.currentTarget.closest('dialog').close(); showToast('車輛資訊已更新');
+      });
+
+      document.addEventListener('click', event => {
+        const maintenanceId = event.target.closest('[data-delete-maintenance]')?.dataset.deleteMaintenance;
+        const inspectionId = event.target.closest('[data-delete-inspection]')?.dataset.deleteInspection;
+        if (maintenanceId && confirm('確定刪除這筆保養紀錄？')) {
+          state.maintenance = state.maintenance.filter(item => item.id !== maintenanceId);
+          saveState(); render(); showToast('保養紀錄已刪除');
+        }
+        if (inspectionId && confirm('確定刪除這筆驗車紀錄？')) {
+          state.inspections = state.inspections.filter(item => item.id !== inspectionId);
+          saveState(); render(); showToast('驗車紀錄已刪除');
+        }
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
