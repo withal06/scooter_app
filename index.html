@@ -236,6 +236,12 @@
               <div class="document-card-actions"><button class="button primary small" data-upload-document="license">＋ 上傳駕照</button><button class="button danger small hidden" data-delete-document="license">刪除</button></div>
               <input class="hidden" id="licenseFile" type="file" accept="image/*,application/pdf">
             </article>
+            <article class="document-card" data-document-type="insurance">
+              <div class="document-card-head"><div class="document-icon" aria-hidden="true">▤</div><div><h2>強制險</h2></div></div>
+              <div class="document-preview" id="insurancePreview"><div class="document-empty"><span class="document-empty-symbol" aria-hidden="true">＋</span>尚未上傳強制險</div></div>
+              <div class="document-card-actions"><button class="button primary small" data-upload-document="insurance">＋ 上傳強制險</button><button class="button danger small hidden" data-delete-document="insurance">刪除</button></div>
+              <input class="hidden" id="insuranceFile" type="file" accept="image/*,application/pdf">
+            </article>
           </div>
         </section>
       </main>
@@ -297,6 +303,7 @@
     (() => {
       const STORAGE_KEY = 'scooter-helper-v1';
       const DOCUMENT_DB = 'scooter-helper-documents-v1';
+      const documentLabels = { registration: '行照', license: '駕照', insurance: '強制險' };
       const initialState = {
         vehicle: { name: '小白', plate: 'PAB-6992', mileage: 2000 },
         maintenance: [
@@ -495,10 +502,9 @@
             uploadButton.textContent = `↻ 更換${item.label}`;
             deleteButton.classList.remove('hidden');
           });
-          ['registration', 'license'].forEach(type => {
+          Object.entries(documentLabels).forEach(([type, label]) => {
             if (documents.some(item => item.type === type)) return;
             const preview = document.getElementById(`${type}Preview`);
-            const label = type === 'registration' ? '行照' : '駕照';
             preview.classList.remove('has-file');
             preview.innerHTML = `<div class="document-empty"><span class="document-empty-symbol" aria-hidden="true">＋</span>尚未上傳${label}</div>`;
             document.querySelector(`[data-upload-document="${type}"]`).textContent = `＋ 上傳${label}`;
@@ -515,14 +521,14 @@
           showToast('請選擇圖片或 PDF 檔案');
           return;
         }
-        const label = type === 'registration' ? '行照' : '駕照';
+        const label = documentLabels[type];
         await documentRequest('readwrite', store => store.put({ type, label, name: file.name, file, updatedAt: new Date().toISOString() }));
         await renderDocuments();
         showToast(`${label}已儲存於此裝置`);
       }
 
       async function deleteDocument(type) {
-        const label = type === 'registration' ? '行照' : '駕照';
+        const label = documentLabels[type];
         if (!confirm(`確定刪除已儲存的${label}？`)) return;
         await documentRequest('readwrite', store => store.delete(type));
         await renderDocuments();
@@ -638,7 +644,7 @@
       document.querySelectorAll('.document-card input[type="file"]').forEach(input => input.addEventListener('change', async event => {
         const file = event.target.files[0];
         if (!file) return;
-        try { await saveDocument(event.target.id === 'registrationFile' ? 'registration' : 'license', file); }
+        try { await saveDocument(event.target.id.replace(/File$/, ''), file); }
         catch (error) { showToast('儲存失敗，請確認裝置儲存空間足夠。'); }
         event.target.value = '';
       }));
