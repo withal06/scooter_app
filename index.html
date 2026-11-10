@@ -93,7 +93,6 @@
     .side-rule { height: 1px; margin: 14px 0; background: var(--line); }
     .side-row { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 11px; }
     .side-row strong { color: var(--ink); font-weight: 700; }
-    .info-note { color: var(--muted); font-size: 11px; line-height: 1.65; }
     .inspect-banner { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 16px; padding: 20px; border: 1px solid #f4d9c9; border-radius: 12px; background: #fff6ef; }
     .inspect-banner .eyebrow { color: #a55031; }
     .inspect-banner h2 { margin: 7px 0 4px; font-size: 20px; }
@@ -103,6 +102,13 @@
     .inspection-year:last-child { border-bottom: 0; }
     .inspection-year-label { flex: 1; }
     .inspection-year-number { color: var(--green); font-family: 'Noto Sans TC', sans-serif; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .fuel-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .fuel-stat { min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
+    .fuel-stat-label { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .fuel-stat-value { margin-top: 8px; color: var(--green); font-family: 'DM Mono', monospace; font-size: clamp(18px, 2.4vw, 25px); font-weight: 500; white-space: nowrap; }
+    .fuel-stat-unit { margin-left: 4px; color: var(--muted); font-family: 'Noto Sans TC', sans-serif; font-size: 11px; }
+    .fuel-note { margin: 0 0 22px; padding: 12px 14px; border: 1px solid #dcebe1; border-radius: 9px; background: #f5faf6; color: var(--muted); font-size: 11px; line-height: 1.65; }
+    .fuel-note strong { color: var(--green); }
     .edit-button:hover { background: var(--mint); color: var(--green); }
     .document-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
     .document-card { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
@@ -144,6 +150,7 @@
       .sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-top: 22px; }
       .side-panel { padding: 15px; }
       .page-heading { margin-top: 0; }
+      .fuel-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 430px) {
       .brand-mark { width: 38px; height: 38px; }
@@ -176,8 +183,8 @@
         <div><div class="brand-name">小白機車小幫手</div><div class="brand-caption">RIDE CARE / YOUR SCOOTER</div></div>
       </div>
       <div class="top-actions">
-        <button class="button" id="importButton" title="匯入 CSV"><span class="icon" aria-hidden="true">⇧</span>匯入 CSV</button>
-        <button class="button" id="exportButton" title="匯出 CSV"><span class="icon" aria-hidden="true">⇩</span>匯出 CSV</button>
+        <button class="button" id="importButton" title="匯入保養 CSV"><span class="icon" aria-hidden="true">⇧</span><span class="csv-button-label">匯入保養 CSV</span></button>
+        <button class="button" id="exportButton" title="匯出保養 CSV"><span class="icon" aria-hidden="true">⇩</span><span class="csv-button-label">匯出保養 CSV</span></button>
         <input id="fileInput" class="hidden" type="file" accept=".csv,text/csv">
       </div>
     </header>
@@ -191,6 +198,7 @@
         <nav class="tabs" aria-label="主要頁面">
           <button class="tab active" data-tab="maintenance" aria-current="page">保養紀錄 <span class="tab-count" id="maintenanceCount">0</span></button>
           <button class="tab" data-tab="inspection">年度驗車 <span class="tab-count" id="inspectionCount">0</span></button>
+          <button class="tab" data-tab="fuel">油耗計算 <span class="tab-count" id="fuelCount">0</span></button>
           <button class="tab" data-tab="documents">車輛證件 <span class="tab-count" id="documentCount">0</span></button>
         </nav>
 
@@ -220,6 +228,21 @@
             <button class="button primary small" id="addInspectionButton"><span class="icon" aria-hidden="true">＋</span>新增驗車</button>
           </div>
           <div class="record-list" id="inspectionList"></div>
+        </section>
+
+        <section id="fuelPage" class="hidden">
+          <div class="fuel-stats" aria-label="油耗統計">
+            <article class="fuel-stat"><div class="fuel-stat-label">總平均油耗</div><div class="fuel-stat-value"><span id="averageFuelEconomy">—</span><span class="fuel-stat-unit">km/L</span></div></article>
+            <article class="fuel-stat"><div class="fuel-stat-label">每公里油錢</div><div class="fuel-stat-value"><span id="fuelCostPerKm">—</span><span class="fuel-stat-unit">元/km</span></div></article>
+            <article class="fuel-stat"><div class="fuel-stat-label">累計加油金額</div><div class="fuel-stat-value"><span id="totalFuelCost">—</span><span class="fuel-stat-unit">元</span></div></article>
+            <article class="fuel-stat"><div class="fuel-stat-label">平均油價</div><div class="fuel-stat-value"><span id="averageFuelPrice">—</span><span class="fuel-stat-unit">元/L</span></div></article>
+          </div>
+          <p class="fuel-note"><strong>計算方式：</strong>假設每次加油皆加滿，以兩次加油的里程差除以後一次加油量計算；第一筆作為起算里程，不納入平均油耗。示範紀錄可編輯或刪除。</p>
+          <div class="section-heading">
+            <div><h2>加油紀錄</h2><p>記下日期、加油時里程、油量與每公升價格。</p></div>
+            <button class="button primary small" id="addFuelButton"><span class="icon" aria-hidden="true">＋</span>新增加油</button>
+          </div>
+          <div class="record-list" id="fuelList"></div>
         </section>
 
         <section id="documentsPage" class="hidden">
@@ -261,10 +284,6 @@
           <div class="side-rule"></div>
           <div class="side-row"><span>保養次數</span><strong id="serviceCountValue">0 次</strong></div>
         </section>
-        <section class="side-panel">
-          <div class="side-title"><span>資料備份</span><span class="side-symbol" aria-hidden="true">↗</span></div>
-          <div class="info-note">保養與驗車資料可用 CSV 一次備份或轉移。資料也會保存在此裝置的瀏覽器中。</div>
-        </section>
       </aside>
     </div>
   </div>
@@ -289,6 +308,18 @@
     </form>
   </dialog>
 
+  <dialog id="fuelDialog">
+    <div class="dialog-head"><h2 id="fuelDialogTitle">新增加油紀錄</h2><button class="dialog-close" data-close="fuelDialog" aria-label="關閉">×</button></div>
+    <form class="dialog-form" id="fuelForm">
+      <div class="field"><label for="fuelDate">加油日期</label><input id="fuelDate" name="date" type="date" required></div>
+      <div class="field"><label for="fuelOdometer">加油時總里程（公里）</label><input id="fuelOdometer" name="odometer" type="number" min="0" step="1" placeholder="例如 3200" required></div>
+      <div class="field"><label for="fuelLiters">加油量（公升）</label><input id="fuelLiters" name="liters" type="number" min="0.01" step="0.01" placeholder="例如 5" required></div>
+      <div class="field"><label for="fuelUnitPrice">每公升價格（元）</label><input id="fuelUnitPrice" name="unitPrice" type="number" min="0.01" step="0.01" placeholder="例如 29" required></div>
+      <p class="form-hint">建議每次都加滿並記錄，油耗估算才會較準確。</p>
+      <div class="form-actions"><button class="button" type="button" data-close="fuelDialog">取消</button><button class="button primary" type="submit">儲存紀錄</button></div>
+    </form>
+  </dialog>
+
   <dialog id="vehicleDialog">
     <div class="dialog-head"><h2>編輯車輛資訊</h2><button class="dialog-close" data-close="vehicleDialog" aria-label="關閉">×</button></div>
     <form class="dialog-form" id="vehicleForm">
@@ -305,7 +336,7 @@
       const DOCUMENT_DB = 'scooter-helper-documents-v1';
       const documentLabels = { registration: '行照', license: '駕照', insurance: '強制險' };
       const initialState = {
-        vehicle: { name: '小白', plate: 'PAB-6992', mileage: 2000 },
+        vehicle: { name: '小白', plate: 'PAB-6992', mileage: 3020 },
         maintenance: [
           { id: 'm-1', sequence: '第一次', date: '2026-03-10', odometer: 1000, content: '換機油' },
           { id: 'm-2', sequence: '第二次', date: '2026-03-10', odometer: 2000, content: '換機油與齒輪油' }
@@ -313,6 +344,13 @@
         inspections: [
           { id: 'i-1', sequence: '第一次', date: '2026-10-10' },
           { id: 'i-2', sequence: '第二次', date: '2027-11-11' }
+        ],
+        fuel: [
+          { id: 'f-1', date: '2026-06-10', odometer: 2040, liters: 5, unitPrice: 28 },
+          { id: 'f-2', date: '2026-07-10', odometer: 2280, liters: 5, unitPrice: 29 },
+          { id: 'f-3', date: '2026-08-10', odometer: 2535, liters: 5, unitPrice: 30 },
+          { id: 'f-4', date: '2026-09-10', odometer: 2780, liters: 5, unitPrice: 29 },
+          { id: 'f-5', date: '2026-10-10', odometer: 3020, liters: 5, unitPrice: 28 }
         ]
       };
       const numerals = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
@@ -321,14 +359,36 @@
       let documentDbPromise;
       let editingMaintenanceId = null;
       let editingInspectionId = null;
+      let editingFuelId = null;
+      let pendingImportMode = 'maintenance';
       const documentUrls = {};
 
       function loadState() {
         try {
           const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-          if (saved && saved.vehicle && Array.isArray(saved.maintenance) && Array.isArray(saved.inspections)) return saved;
+          if (saved && saved.vehicle && Array.isArray(saved.maintenance) && Array.isArray(saved.inspections)) {
+            if (!Array.isArray(saved.fuel)) {
+              saved.fuel = Number(saved.vehicle.mileage) >= 980 ? sampleFuelRecords(Number(saved.vehicle.mileage)) : [];
+              try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); }
+              catch (error) { console.warn('無法保存油耗資料格式更新，稍後編輯資料時會再次儲存。', error); }
+            }
+            return saved;
+          }
         } catch (error) { console.warn('無法讀取本機資料，使用預設內容。', error); }
         return structuredClone(initialState);
+      }
+
+      function sampleFuelRecords(endOdometer) {
+        const offsets = [980, 740, 485, 240, 0];
+        const dates = ['2026-06-10', '2026-07-10', '2026-08-10', '2026-09-10', '2026-10-10'];
+        const prices = [28, 29, 30, 29, 28];
+        return offsets.map((offset, index) => ({
+          id: `f-${index + 1}`,
+          date: dates[index],
+          odometer: endOdometer - offset,
+          liters: 5,
+          unitPrice: prices[index]
+        }));
       }
 
       function saveState() {
@@ -386,6 +446,7 @@
         const sortedInspections = [...state.inspections].sort((a, b) => b.date.localeCompare(a.date));
         document.getElementById('maintenanceCount').textContent = state.maintenance.length;
         document.getElementById('inspectionCount').textContent = state.inspections.length;
+        document.getElementById('fuelCount').textContent = state.fuel.length;
         document.getElementById('mileageValue').textContent = Number(state.vehicle.mileage || 0).toLocaleString('en-US');
         document.getElementById('plateValue').textContent = state.vehicle.plate;
         document.getElementById('vehicleNameValue').textContent = state.vehicle.name;
@@ -415,6 +476,36 @@
         document.getElementById('sideInspectionCaption').textContent = next ? `${parseDate(next).getFullYear()} 年驗車 · ${reminder}` : '新增驗車日期以建立提醒';
         document.getElementById('reminderStatus').textContent = reminder;
         document.querySelector('.reminder-state .dot').style.background = days !== null && days <= 30 ? '#e9784c' : '#74a982';
+
+        const sortedFuel = [...state.fuel].sort((a, b) => a.date.localeCompare(b.date) || a.odometer - b.odometer);
+        const totalLiters = sortedFuel.reduce((total, item) => total + Number(item.liters), 0);
+        const totalCost = sortedFuel.reduce((total, item) => total + Number(item.liters) * Number(item.unitPrice), 0);
+        const intervals = sortedFuel.slice(1).map((item, index) => ({
+          distance: Number(item.odometer) - Number(sortedFuel[index].odometer),
+          liters: Number(item.liters),
+          cost: Number(item.liters) * Number(item.unitPrice)
+        })).filter(item => item.distance > 0 && item.liters > 0);
+        const measuredDistance = intervals.reduce((total, item) => total + item.distance, 0);
+        const measuredLiters = intervals.reduce((total, item) => total + item.liters, 0);
+        const measuredCost = intervals.reduce((total, item) => total + item.cost, 0);
+        document.getElementById('averageFuelEconomy').textContent = measuredLiters ? (measuredDistance / measuredLiters).toFixed(1) : '—';
+        document.getElementById('fuelCostPerKm').textContent = measuredDistance ? (measuredCost / measuredDistance).toFixed(2) : '—';
+        document.getElementById('totalFuelCost').textContent = totalCost.toFixed(0);
+        document.getElementById('averageFuelPrice').textContent = totalLiters ? (totalCost / totalLiters).toFixed(1) : '—';
+        const fuelList = document.getElementById('fuelList');
+        fuelList.innerHTML = sortedFuel.length ? [...sortedFuel].reverse().map((item, reverseIndex) => {
+          const index = sortedFuel.length - reverseIndex - 1;
+          const previous = sortedFuel[index - 1];
+          const distance = previous ? Number(item.odometer) - Number(previous.odometer) : null;
+          const economy = distance > 0 && Number(item.liters) > 0 ? `${(distance / Number(item.liters)).toFixed(1)} km/L` : '起算紀錄';
+          const ordinalNumber = index + 1;
+          return `
+            <article class="record" style="animation-delay:${reverseIndex * 45}ms">
+              <div class="record-index">加油${ordinalNumber}</div>
+              <div><div class="record-title">${Number(item.liters).toFixed(1)} 公升 · ${Number(item.unitPrice).toFixed(1)} 元/L</div><div class="record-meta"><span>${formatDate(item.date)}</span><span>里程 ${Number(item.odometer).toLocaleString('en-US')} km</span><span>單次油耗 ${economy}</span><span>合計 ${(Number(item.liters) * Number(item.unitPrice)).toFixed(0)} 元</span></div></div>
+              <div style="display:flex;align-items:center;gap:4px"><button class="delete-button edit-button" data-edit-fuel="${escapeHtml(item.id)}" aria-label="編輯加油紀錄" title="編輯紀錄">✎</button><button class="delete-button" data-delete-fuel="${escapeHtml(item.id)}" aria-label="刪除加油紀錄" title="刪除紀錄">×</button></div>
+            </article>`;
+        }).join('') : '<div class="empty-state">目前還沒有加油紀錄，新增一筆開始計算油耗。</div>';
       }
 
       function openDialog(id, recordId = null) {
@@ -433,6 +524,15 @@
           document.getElementById('inspectionDialogTitle').textContent = record ? '編輯驗車紀錄' : '新增驗車紀錄';
           document.getElementById('inspectionDate').value = record?.date || todayIso();
         }
+        if (id === 'fuelDialog') {
+          const record = state.fuel.find(item => item.id === recordId);
+          editingFuelId = record?.id || null;
+          document.getElementById('fuelDialogTitle').textContent = record ? '編輯加油紀錄' : '新增加油紀錄';
+          document.getElementById('fuelDate').value = record?.date || todayIso();
+          document.getElementById('fuelOdometer').value = record?.odometer ?? '';
+          document.getElementById('fuelLiters').value = record?.liters ?? 5;
+          document.getElementById('fuelUnitPrice').value = record?.unitPrice ?? 29;
+        }
         if (id === 'vehicleDialog') {
           document.getElementById('vehicleName').value = state.vehicle.name;
           document.getElementById('vehiclePlate').value = state.vehicle.plate;
@@ -443,12 +543,23 @@
 
       function switchTab(tab) {
         const inspection = tab === 'inspection';
+        const fuel = tab === 'fuel';
         const documents = tab === 'documents';
         document.getElementById('maintenancePage').classList.toggle('hidden', tab !== 'maintenance');
         document.getElementById('inspectionPage').classList.toggle('hidden', !inspection);
+        document.getElementById('fuelPage').classList.toggle('hidden', !fuel);
         document.getElementById('documentsPage').classList.toggle('hidden', !documents);
         document.getElementById('homeSummary').classList.toggle('hidden', tab !== 'maintenance');
-        document.getElementById('pageTitle').textContent = inspection ? '年度驗車記錄' : documents ? '車輛證件' : '行車保養紀錄';
+        document.getElementById('pageTitle').textContent = inspection ? '年度驗車記錄' : fuel ? '油耗計算' : documents ? '車輛證件' : '行車保養紀錄';
+        const csvActions = document.querySelector('.top-actions');
+        const showCsvActions = tab === 'maintenance' || fuel;
+        csvActions.classList.toggle('hidden', !showCsvActions);
+        pendingImportMode = fuel ? 'fuel' : 'maintenance';
+        const csvTypeLabel = fuel ? '油耗' : '保養';
+        document.querySelector('#importButton .csv-button-label').textContent = `匯入${csvTypeLabel} CSV`;
+        document.querySelector('#exportButton .csv-button-label').textContent = `匯出${csvTypeLabel} CSV`;
+        document.getElementById('importButton').title = `匯入${csvTypeLabel} CSV`;
+        document.getElementById('exportButton').title = `匯出${csvTypeLabel} CSV`;
         document.querySelectorAll('.tab').forEach(button => {
           const active = button.dataset.tab === tab;
           button.classList.toggle('active', active);
@@ -540,18 +651,28 @@
         return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
       }
 
-      function exportCsv() {
-        const rows = [['類型', '車名', '車牌', '次數', '日期', '總里程(公里)', '保養內容', '目前里程(公里)']];
-        state.maintenance.forEach(item => rows.push(['保養', state.vehicle.name, state.vehicle.plate, item.sequence, item.date.replace(/-/g, '/'), item.odometer, item.content, state.vehicle.mileage]));
-        state.inspections.forEach(item => rows.push(['驗車', state.vehicle.name, state.vehicle.plate, item.sequence, item.date.replace(/-/g, '/'), '', '', state.vehicle.mileage]));
+      function downloadCsv(rows, filename, message) {
         const csv = '\ufeff' + rows.map(row => row.map(csvCell).join(',')).join('\r\n');
         const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
         const link = document.createElement('a');
         link.href = url;
-        link.download = `小白機車紀錄_${todayIso()}.csv`;
+        link.download = filename;
         link.click();
         URL.revokeObjectURL(url);
-        showToast('CSV 已匯出');
+        showToast(message);
+      }
+
+      function exportMaintenanceCsv() {
+        const rows = [['類型', '車名', '車牌', '次數', '日期', '總里程(公里)', '保養內容', '目前里程(公里)']];
+        state.maintenance.forEach(item => rows.push(['保養', state.vehicle.name, state.vehicle.plate, item.sequence, item.date.replace(/-/g, '/'), item.odometer, item.content, state.vehicle.mileage]));
+        state.inspections.forEach(item => rows.push(['驗車', state.vehicle.name, state.vehicle.plate, item.sequence, item.date.replace(/-/g, '/'), '', '', state.vehicle.mileage]));
+        downloadCsv(rows, `小白保養紀錄_${todayIso()}.csv`, '保養 CSV 已匯出');
+      }
+
+      function exportFuelCsv() {
+        const rows = [['車名', '車牌', '日期', '總里程(公里)', '加油量(公升)', '單價(元/公升)']];
+        state.fuel.forEach(item => rows.push([state.vehicle.name, state.vehicle.plate, item.date.replace(/-/g, '/'), item.odometer, item.liters, item.unitPrice]));
+        downloadCsv(rows, `小白油耗紀錄_${todayIso()}.csv`, '油耗 CSV 已匯出');
       }
 
       function parseCsv(text) {
@@ -589,18 +710,26 @@
         return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       }
 
-      async function importCsv(file) {
+      function isMaintenanceCsvHeader(header) {
+        const required = ['類型', '車名', '車牌', '次數', '日期', '總里程(公里)', '保養內容'];
+        return required.every((name, index) => header[index] === name) &&
+          (header.length === 7 || (header[7] === '目前里程(公里)' &&
+            (header.length === 8 || (header.length === 10 &&
+              header[8] === '加油量(公升)' && header[9] === '單價(元/公升)'))));
+      }
+
+      async function importMaintenanceCsv(file) {
         try {
           const rows = parseCsv(await file.text());
           const header = rows.shift()?.map(value => value.trim());
-          const required = ['類型', '車名', '車牌', '次數', '日期', '總里程(公里)', '保養內容'];
-          if (!header || required.some((name, index) => header[index] !== name) || (header.length > 7 && header[7] !== '目前里程(公里)')) throw new Error('CSV 欄位不符合格式');
+          if (!header || !isMaintenanceCsvHeader(header)) throw new Error('這不是保養 CSV，請選擇保養紀錄匯出的 CSV 檔案');
           if (!rows.length) throw new Error('CSV 沒有任何資料');
           const vehicle = { name: '', plate: '', mileage: 0 };
           const maintenance = [];
           const inspections = [];
           rows.forEach((row, index) => {
             const [type, name, plate, sequence, rawDate, rawMileage, content, rawCurrentMileage] = row;
+            if (type !== '保養' && type !== '驗車') return;
             const date = normalizeDate(rawDate);
             if (!date || !name?.trim() || !plate?.trim()) throw new Error(`第 ${index + 2} 列資料不完整`);
             vehicle.name = name.trim();
@@ -616,16 +745,70 @@
               maintenance.push({ id: `m-${Date.now()}-${index}`, sequence: sequence?.trim() || ordinal(maintenance.length), date, odometer, content: content.trim() });
               vehicle.mileage = Math.max(vehicle.mileage, odometer);
             } else if (type === '驗車') inspections.push({ id: `i-${Date.now()}-${index}`, sequence: sequence?.trim() || ordinal(inspections.length), date });
-            else throw new Error(`第 ${index + 2} 列類型必須是「保養」或「驗車」`);
           });
-          if (!vehicle.name || !vehicle.plate) throw new Error('找不到車輛資訊');
-          if (!confirm('匯入會取代目前所有保養與驗車紀錄，確定繼續嗎？')) return;
-          state = { vehicle, maintenance, inspections };
+          if (!maintenance.length && !inspections.length) throw new Error('CSV 中沒有保養或驗車紀錄');
+          vehicle.name ||= state.vehicle.name;
+          vehicle.plate ||= state.vehicle.plate;
+          vehicle.mileage = Math.max(vehicle.mileage, ...state.fuel.map(item => Number(item.odometer)));
+          if (!confirm('匯入會取代目前的保養與驗車紀錄，但不會更動油耗資料。確定繼續嗎？')) return;
+          state = { ...state, vehicle, maintenance, inspections };
           saveState();
           render();
-          showToast('CSV 匯入完成');
+          showToast('保養 CSV 匯入完成');
         } catch (error) {
-          showToast(error.message || 'CSV 匯入失敗');
+          showToast(error.message || '保養 CSV 匯入失敗');
+        } finally {
+          document.getElementById('fileInput').value = '';
+        }
+      }
+
+      function isLegacyFuelCsvHeader(header) {
+        return isMaintenanceCsvHeader(header) && header.length > 9 &&
+          header[8] === '加油量(公升)' && header[9] === '單價(元/公升)';
+      }
+
+      async function importFuelCsv(file) {
+        try {
+          const rows = parseCsv(await file.text());
+          const header = rows.shift()?.map(value => value.trim());
+          const legacyCombined = header && isLegacyFuelCsvHeader(header);
+          const dedicatedFuel = header?.length === 6 &&
+            header[0] === '車名' && header[1] === '車牌' && header[2] === '日期' &&
+            header[3] === '總里程(公里)' && header[4] === '加油量(公升)' && header[5] === '單價(元/公升)';
+          if (!header || (!legacyCombined && !dedicatedFuel)) throw new Error('這不是油耗 CSV，請選擇油耗紀錄匯出的 CSV 檔案');
+          if (!rows.length) throw new Error('CSV 沒有任何資料');
+          const fuel = [];
+          rows.forEach((row, index) => {
+            let rawDate;
+            let rawMileage;
+            let rawLiters;
+            let rawUnitPrice;
+            if (legacyCombined) {
+              if (row[0] !== '加油') return;
+              [, , , , rawDate, rawMileage, , , rawLiters, rawUnitPrice] = row;
+            } else {
+              [, , rawDate, rawMileage, rawLiters, rawUnitPrice] = row;
+            }
+            const date = normalizeDate(rawDate);
+            const odometer = Number(rawMileage);
+            const liters = Number(rawLiters);
+            const unitPrice = Number(rawUnitPrice);
+            if (!date || !Number.isFinite(odometer) || odometer < 0 || !Number.isFinite(liters) || liters <= 0 || !Number.isFinite(unitPrice) || unitPrice <= 0) {
+              throw new Error(`第 ${index + 2} 列加油資料錯誤`);
+            }
+            fuel.push({ id: `f-${Date.now()}-${index}`, date, odometer, liters, unitPrice });
+          });
+          if (!fuel.length) throw new Error('CSV 中沒有加油紀錄');
+          const orderedFuel = [...fuel].sort((a, b) => a.date.localeCompare(b.date) || a.odometer - b.odometer);
+          if (orderedFuel.some((item, index) => index > 0 && item.odometer <= orderedFuel[index - 1].odometer)) throw new Error('加油資料的里程必須依日期遞增');
+          if (!confirm('匯入會取代目前所有油耗加油紀錄，但不會更動保養與驗車資料。確定繼續嗎？')) return;
+          state = { ...state, fuel };
+          state.vehicle.mileage = Math.max(Number(state.vehicle.mileage) || 0, ...fuel.map(item => item.odometer));
+          saveState();
+          render();
+          showToast('油耗 CSV 匯入完成');
+        } catch (error) {
+          showToast(error.message || '油耗 CSV 匯入失敗');
         } finally {
           document.getElementById('fileInput').value = '';
         }
@@ -634,10 +817,22 @@
       document.querySelectorAll('.tab').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.tab)));
       document.getElementById('addMaintenanceButton').addEventListener('click', () => openDialog('maintenanceDialog'));
       document.getElementById('addInspectionButton').addEventListener('click', () => openDialog('inspectionDialog'));
+      document.getElementById('addFuelButton').addEventListener('click', () => openDialog('fuelDialog'));
       document.getElementById('editVehicleButton').addEventListener('click', () => openDialog('vehicleDialog'));
-      document.getElementById('exportButton').addEventListener('click', exportCsv);
-      document.getElementById('importButton').addEventListener('click', () => document.getElementById('fileInput').click());
-      document.getElementById('fileInput').addEventListener('change', event => { if (event.target.files[0]) importCsv(event.target.files[0]); });
+      document.getElementById('exportButton').addEventListener('click', () => {
+        if (pendingImportMode === 'fuel') exportFuelCsv();
+        else exportMaintenanceCsv();
+      });
+      document.getElementById('importButton').addEventListener('click', () => {
+        pendingImportMode = document.querySelector('.tab.active').dataset.tab === 'fuel' ? 'fuel' : 'maintenance';
+        document.getElementById('fileInput').value = '';
+        document.getElementById('fileInput').click();
+      });
+      document.getElementById('fileInput').addEventListener('change', event => {
+        if (!event.target.files[0]) return;
+        if (pendingImportMode === 'fuel') importFuelCsv(event.target.files[0]);
+        else importMaintenanceCsv(event.target.files[0]);
+      });
       document.querySelectorAll('[data-upload-document]').forEach(button => button.addEventListener('click', () => {
         document.getElementById(`${button.dataset.uploadDocument}File`).click();
       }));
@@ -684,6 +879,33 @@
         editingInspectionId = null;
       });
 
+      document.getElementById('fuelForm').addEventListener('submit', event => {
+        event.preventDefault();
+        const form = new FormData(event.currentTarget);
+        const record = {
+          id: editingFuelId || `f-${Date.now()}`,
+          date: String(form.get('date')),
+          odometer: Number(form.get('odometer')),
+          liters: Number(form.get('liters')),
+          unitPrice: Number(form.get('unitPrice'))
+        };
+        if (!record.date || !Number.isFinite(record.odometer) || record.odometer < 0 || !Number.isFinite(record.liters) || record.liters <= 0 || !Number.isFinite(record.unitPrice) || record.unitPrice <= 0) {
+          showToast('請輸入有效的加油日期、里程、油量與單價');
+          return;
+        }
+        const orderedFuel = [...state.fuel.filter(item => item.id !== editingFuelId), record]
+          .sort((a, b) => a.date.localeCompare(b.date) || a.odometer - b.odometer);
+        const index = orderedFuel.findIndex(item => item.id === record.id);
+        if ((index > 0 && record.odometer <= orderedFuel[index - 1].odometer) || (index < orderedFuel.length - 1 && record.odometer >= orderedFuel[index + 1].odometer)) {
+          showToast('加油里程需依日期遞增，請檢查前後紀錄');
+          return;
+        }
+        state.fuel = orderedFuel;
+        state.vehicle.mileage = Math.max(Number(state.vehicle.mileage) || 0, record.odometer);
+        saveState(); render(); event.currentTarget.closest('dialog').close(); showToast(editingFuelId ? '加油紀錄已更新' : '加油紀錄已儲存');
+        editingFuelId = null;
+      });
+
       document.getElementById('vehicleForm').addEventListener('submit', event => {
         event.preventDefault();
         const form = new FormData(event.currentTarget);
@@ -696,8 +918,11 @@
         const inspectionEditId = event.target.closest('[data-edit-inspection]')?.dataset.editInspection;
         const maintenanceId = event.target.closest('[data-delete-maintenance]')?.dataset.deleteMaintenance;
         const inspectionId = event.target.closest('[data-delete-inspection]')?.dataset.deleteInspection;
+        const fuelEditId = event.target.closest('[data-edit-fuel]')?.dataset.editFuel;
+        const fuelId = event.target.closest('[data-delete-fuel]')?.dataset.deleteFuel;
         if (maintenanceEditId) openDialog('maintenanceDialog', maintenanceEditId);
         if (inspectionEditId) openDialog('inspectionDialog', inspectionEditId);
+        if (fuelEditId) openDialog('fuelDialog', fuelEditId);
         if (maintenanceId && confirm('確定刪除這筆保養紀錄？')) {
           state.maintenance = state.maintenance.filter(item => item.id !== maintenanceId);
           saveState(); render(); showToast('保養紀錄已刪除');
@@ -705,6 +930,10 @@
         if (inspectionId && confirm('確定刪除這筆驗車紀錄？')) {
           state.inspections = state.inspections.filter(item => item.id !== inspectionId);
           saveState(); render(); showToast('驗車紀錄已刪除');
+        }
+        if (fuelId && confirm('確定刪除這筆加油紀錄？')) {
+          state.fuel = state.fuel.filter(item => item.id !== fuelId);
+          saveState(); render(); showToast('加油紀錄已刪除');
         }
       });
 
