@@ -109,6 +109,17 @@
     .fuel-stat-unit { margin-left: 4px; color: var(--muted); font-family: 'Noto Sans TC', sans-serif; font-size: 11px; }
     .fuel-note { margin: 0 0 22px; padding: 12px 14px; border: 1px solid #dcebe1; border-radius: 9px; background: #f5faf6; color: var(--muted); font-size: 11px; line-height: 1.65; }
     .fuel-note strong { color: var(--green); }
+    .chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 18px 0 20px; }
+    .chart-panel { min-width: 0; padding: 17px 17px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
+    .chart-panel h2 { margin: 0; font-size: 14px; }
+    .chart-panel p { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+    .chart-wrap { width: 100%; min-height: 210px; margin-top: 12px; }
+    .chart-svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .chart-svg text { fill: var(--muted); font-family: 'DM Mono', 'Noto Sans TC', sans-serif; font-size: 10px; }
+    .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 6px; color: var(--muted); font-size: 10px; }
+    .chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend-swatch { width: 8px; height: 8px; border-radius: 2px; }
+    .chart-empty { display: grid; min-height: 190px; place-items: center; padding: 20px; color: var(--muted); font-size: 12px; text-align: center; }
     .edit-button:hover { background: var(--mint); color: var(--green); }
     .document-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
     .document-card { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
@@ -151,6 +162,7 @@
       .side-panel { padding: 15px; }
       .page-heading { margin-top: 0; }
       .fuel-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chart-grid { grid-template-columns: minmax(0, 1fr); }
     }
     @media (max-width: 430px) {
       .brand-mark { width: 38px; height: 38px; }
@@ -237,6 +249,19 @@
             <article class="fuel-stat"><div class="fuel-stat-label">累計加油金額</div><div class="fuel-stat-value"><span id="totalFuelCost">—</span><span class="fuel-stat-unit">元</span></div></article>
             <article class="fuel-stat"><div class="fuel-stat-label">平均油價</div><div class="fuel-stat-value"><span id="averageFuelPrice">—</span><span class="fuel-stat-unit">元/L</span></div></article>
           </div>
+          <div class="chart-grid">
+            <section class="chart-panel" aria-labelledby="monthlyExpensesTitle">
+              <h2 id="monthlyExpensesTitle">每月支出</h2>
+              <p>近六個月，包含加油與保養費用</p>
+              <div class="chart-wrap" id="monthlyExpenseChart"></div>
+              <div class="chart-legend"><span><i class="legend-swatch" style="background:#245c46"></i>加油</span><span><i class="legend-swatch" style="background:#e9784c"></i>保養</span></div>
+            </section>
+            <section class="chart-panel" aria-labelledby="fuelTrendTitle">
+              <h2 id="fuelTrendTitle">油耗趨勢</h2>
+              <p>每次加油區間估算，公里／公升</p>
+              <div class="chart-wrap" id="fuelTrendChart"></div>
+            </section>
+          </div>
           <p class="fuel-note"><strong>計算方式：</strong>假設每次加油皆加滿，以兩次加油的里程差除以後一次加油量計算；第一筆作為起算里程，不納入平均油耗。示範紀錄可編輯或刪除。</p>
           <div class="section-heading">
             <div><h2>加油紀錄</h2><p>記下日期、加油時里程、油量與每公升價格。</p></div>
@@ -295,6 +320,7 @@
       <div class="field"><label for="serviceDate">保養日期</label><input id="serviceDate" name="date" type="date" required></div>
       <div class="field"><label for="serviceMileage">總里程（公里）</label><input id="serviceMileage" name="odometer" type="number" min="0" step="1" placeholder="例如 3000" required></div>
       <div class="field"><label for="serviceContent">保養內容</label><input id="serviceContent" name="content" type="text" maxlength="120" placeholder="例如：更換機油" required></div>
+      <div class="field"><label for="serviceCost">保養費用（元，可留空）</label><input id="serviceCost" name="cost" type="number" min="0" step="1" placeholder="例如 800"></div>
       <div class="form-actions"><button class="button" type="button" data-close="maintenanceDialog">取消</button><button class="button primary" type="submit">儲存紀錄</button></div>
     </form>
   </dialog>
@@ -422,6 +448,93 @@
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       }
 
+      function renderMonthlyExpenseChart() {
+        const now = new Date();
+        const months = Array.from({ length: 6 }, (_, index) => new Date(now.getFullYear(), now.getMonth() - 5 + index, 1));
+        const totals = months.map(date => ({ date, fuel: 0, maintenance: 0 }));
+        const monthIndexes = new Map(totals.map((item, index) => [`${item.date.getFullYear()}-${String(item.date.getMonth() + 1).padStart(2, '0')}`, index]));
+        state.fuel.forEach(item => {
+          const index = monthIndexes.get(item.date.slice(0, 7));
+          if (index !== undefined) totals[index].fuel += Number(item.liters || 0) * Number(item.unitPrice || 0);
+        });
+        state.maintenance.forEach(item => {
+          const index = monthIndexes.get(item.date.slice(0, 7));
+          if (index !== undefined) totals[index].maintenance += Number(item.cost || 0);
+        });
+
+        const width = 520;
+        const height = 220;
+        const left = 46;
+        const right = 12;
+        const top = 14;
+        const bottom = 34;
+        const chartHeight = height - top - bottom;
+        const chartWidth = width - left - right;
+        const highest = Math.max(...totals.map(item => item.fuel + item.maintenance), 0);
+        const tick = highest > 0 ? Math.ceil(highest / 4 / 100) * 100 : 100;
+        const maximum = tick * 4;
+        const slot = chartWidth / totals.length;
+        const barWidth = Math.min(34, slot * .5);
+        const grid = Array.from({ length: 5 }, (_, index) => {
+          const value = tick * index;
+          const y = top + chartHeight - (value / maximum) * chartHeight;
+          return `<line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" stroke="#e8ece6" stroke-width="1"/><text x="${left - 7}" y="${y + 3}" text-anchor="end">${value.toLocaleString('en-US')}</text>`;
+        }).join('');
+        const bars = totals.map((item, index) => {
+          const x = left + slot * index + (slot - barWidth) / 2;
+          const fuelHeight = item.fuel / maximum * chartHeight;
+          const maintenanceHeight = item.maintenance / maximum * chartHeight;
+          const base = top + chartHeight;
+          const label = `${item.date.getMonth() + 1}月`;
+          return `<g><title>${item.date.getFullYear()}年${label}：加油 ${item.fuel.toFixed(0)} 元，保養 ${item.maintenance.toFixed(0)} 元</title><rect x="${x}" y="${base - fuelHeight}" width="${barWidth}" height="${fuelHeight}" rx="3" fill="#245c46"/><rect x="${x}" y="${base - fuelHeight - maintenanceHeight}" width="${barWidth}" height="${maintenanceHeight}" rx="3" fill="#e9784c"/><text x="${x + barWidth / 2}" y="${height - 10}" text-anchor="middle">${label}</text></g>`;
+        }).join('');
+        document.getElementById('monthlyExpenseChart').innerHTML = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="近六個月每月加油與保養支出堆疊長條圖">${grid}${bars}</svg>`;
+      }
+
+      function renderFuelTrendChart(sortedFuel) {
+        const intervals = sortedFuel.slice(1).map((item, index) => ({
+          date: item.date,
+          liters: Number(item.liters),
+          distance: Number(item.odometer) - Number(sortedFuel[index].odometer)
+        })).filter(item => item.distance > 0 && item.liters > 0).slice(-8).map(item => ({
+          ...item,
+          economy: item.distance / item.liters
+        }));
+        const container = document.getElementById('fuelTrendChart');
+        if (!intervals.length) {
+          container.innerHTML = '<div class="chart-empty">新增至少兩筆加油紀錄<br>即可查看油耗趨勢</div>';
+          return;
+        }
+
+        const width = 520;
+        const height = 220;
+        const left = 38;
+        const right = 14;
+        const top = 18;
+        const bottom = 35;
+        const chartHeight = height - top - bottom;
+        const chartWidth = width - left - right;
+        const values = intervals.map(item => item.economy);
+        const low = Math.max(0, Math.min(...values) - Math.max((Math.max(...values) - Math.min(...values)) * .35, 1));
+        const high = Math.max(...values) + Math.max((Math.max(...values) - Math.min(...values)) * .35, 1);
+        const points = intervals.map((item, index) => ({
+          x: intervals.length === 1 ? left + chartWidth / 2 : left + chartWidth * index / (intervals.length - 1),
+          y: top + chartHeight - (item.economy - low) / (high - low) * chartHeight,
+          item
+        }));
+        const grid = Array.from({ length: 5 }, (_, index) => {
+          const value = low + (high - low) * index / 4;
+          const y = top + chartHeight - chartHeight * index / 4;
+          return `<line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" stroke="#e8ece6" stroke-width="1"/><text x="${left - 7}" y="${y + 3}" text-anchor="end">${value.toFixed(0)}</text>`;
+        }).join('');
+        const line = points.map(point => `${point.x},${point.y}`).join(' ');
+        const marks = points.map(point => {
+          const label = `${Number(point.item.date.slice(5, 7))}月`;
+          return `<g><title>${point.item.date}：${point.item.economy.toFixed(1)} km/L</title><circle cx="${point.x}" cy="${point.y}" r="4" fill="#e9784c" stroke="#fffefa" stroke-width="2"/><text x="${point.x}" y="${height - 10}" text-anchor="middle">${label}</text></g>`;
+        }).join('');
+        container.innerHTML = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="最近加油區間的公里每公升油耗趨勢折線圖">${grid}<polyline points="${line}" fill="none" stroke="#245c46" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${marks}</svg>`;
+      }
+
       function nextInspection() {
         if (!state.inspections.length) return null;
         const today = parseDate(todayIso());
@@ -458,7 +571,7 @@
         maintenanceList.innerHTML = sortedMaintenance.length ? sortedMaintenance.map((item, index) => `
           <article class="record" style="animation-delay:${index * 45}ms">
             <div class="record-index">${escapeHtml(item.sequence || ordinal(state.maintenance.indexOf(item)))}</div>
-            <div><div class="record-title">${escapeHtml(item.content)}</div><div class="record-meta"><span>${formatDate(item.date)}</span><span>保養紀錄</span></div></div>
+            <div><div class="record-title">${escapeHtml(item.content)}</div><div class="record-meta"><span>${formatDate(item.date)}</span><span>保養紀錄</span>${Number(item.cost) > 0 ? `<span>費用 ${Number(item.cost).toLocaleString('en-US')} 元</span>` : ''}</div></div>
             <div style="display:flex;align-items:center;gap:4px"><span class="record-distance">${Number(item.odometer).toLocaleString('en-US')} km</span><button class="delete-button edit-button" data-edit-maintenance="${escapeHtml(item.id)}" aria-label="編輯${escapeHtml(item.content)}" title="編輯紀錄">✎</button><button class="delete-button" data-delete-maintenance="${escapeHtml(item.id)}" aria-label="刪除${escapeHtml(item.content)}" title="刪除紀錄">×</button></div>
           </article>`).join('') : '<div class="empty-state">目前還沒有保養紀錄，新增一筆開始追蹤。</div>';
 
@@ -492,6 +605,8 @@
         document.getElementById('fuelCostPerKm').textContent = measuredDistance ? (measuredCost / measuredDistance).toFixed(2) : '—';
         document.getElementById('totalFuelCost').textContent = totalCost.toFixed(0);
         document.getElementById('averageFuelPrice').textContent = totalLiters ? (totalCost / totalLiters).toFixed(1) : '—';
+        renderMonthlyExpenseChart();
+        renderFuelTrendChart(sortedFuel);
         const fuelList = document.getElementById('fuelList');
         fuelList.innerHTML = sortedFuel.length ? [...sortedFuel].reverse().map((item, reverseIndex) => {
           const index = sortedFuel.length - reverseIndex - 1;
@@ -517,6 +632,7 @@
           document.getElementById('serviceDate').value = record?.date || todayIso();
           document.getElementById('serviceMileage').value = record?.odometer ?? state.vehicle.mileage ?? '';
           document.getElementById('serviceContent').value = record?.content || '';
+          document.getElementById('serviceCost').value = record?.cost ?? '';
         }
         if (id === 'inspectionDialog') {
           const record = state.inspections.find(item => item.id === recordId);
@@ -663,9 +779,9 @@
       }
 
       function exportMaintenanceCsv() {
-        const rows = [['類型', '車名', '車牌', '次數', '日期', '總里程(公里)', '保養內容', '目前里程(公里)']];
-        state.maintenance.forEach(item => rows.push(['保養', state.vehicle.name, state.vehicle.plate, item.sequence, item.date.replace(/-/g, '/'), item.odometer, item.content, state.vehicle.mileage]));
-        state.inspections.forEach(item => rows.push(['驗車', state.vehicle.name, state.vehicle.plate, item.sequence, item.date.replace(/-/g, '/'), '', '', state.vehicle.mileage]));
+        const rows = [['類型', '車名', '車牌', '次數', '日期', '總里程(公里)', '保養內容', '目前里程(公里)', '保養費用(元)']];
+        state.maintenance.forEach(item => rows.push(['保養', state.vehicle.name, state.vehicle.plate, item.sequence, item.date.replace(/-/g, '/'), item.odometer, item.content, state.vehicle.mileage, item.cost || 0]));
+        state.inspections.forEach(item => rows.push(['驗車', state.vehicle.name, state.vehicle.plate, item.sequence, item.date.replace(/-/g, '/'), '', '', state.vehicle.mileage, '']));
         downloadCsv(rows, `小白保養紀錄_${todayIso()}.csv`, '保養 CSV 已匯出');
       }
 
@@ -714,8 +830,8 @@
         const required = ['類型', '車名', '車牌', '次數', '日期', '總里程(公里)', '保養內容'];
         return required.every((name, index) => header[index] === name) &&
           (header.length === 7 || (header[7] === '目前里程(公里)' &&
-            (header.length === 8 || (header.length === 10 &&
-              header[8] === '加油量(公升)' && header[9] === '單價(元/公升)'))));
+            (header.length === 8 || (header.length === 9 && header[8] === '保養費用(元)') ||
+              (header.length === 10 && header[8] === '加油量(公升)' && header[9] === '單價(元/公升)'))));
       }
 
       async function importMaintenanceCsv(file) {
@@ -742,7 +858,10 @@
             if (type === '保養') {
               const odometer = Number(rawMileage);
               if (!Number.isFinite(odometer) || odometer < 0 || !content?.trim()) throw new Error(`第 ${index + 2} 列保養資料錯誤`);
-              maintenance.push({ id: `m-${Date.now()}-${index}`, sequence: sequence?.trim() || ordinal(maintenance.length), date, odometer, content: content.trim() });
+              const rawCost = header[8] === '保養費用(元)' ? row[8] : '';
+              const cost = rawCost?.trim() ? Number(rawCost) : 0;
+              if (!Number.isFinite(cost) || cost < 0) throw new Error(`第 ${index + 2} 列保養費用錯誤`);
+              maintenance.push({ id: `m-${Date.now()}-${index}`, sequence: sequence?.trim() || ordinal(maintenance.length), date, odometer, content: content.trim(), cost });
               vehicle.mileage = Math.max(vehicle.mileage, odometer);
             } else if (type === '驗車') inspections.push({ id: `i-${Date.now()}-${index}`, sequence: sequence?.trim() || ordinal(inspections.length), date });
           });
@@ -853,13 +972,15 @@
         event.preventDefault();
         const form = new FormData(event.currentTarget);
         const odometer = Number(form.get('odometer'));
+        const cost = Number(form.get('cost') || 0);
         const existing = state.maintenance.find(item => item.id === editingMaintenanceId);
         const updatedRecord = {
           id: existing?.id || `m-${Date.now()}`,
           sequence: existing?.sequence || ordinal(state.maintenance.length),
           date: form.get('date'),
           odometer,
-          content: String(form.get('content')).trim()
+          content: String(form.get('content')).trim(),
+          cost
         };
         if (existing) state.maintenance = state.maintenance.map(item => item.id === existing.id ? updatedRecord : item);
         else state.maintenance.push(updatedRecord);
