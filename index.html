@@ -58,22 +58,26 @@
     .hero { position: relative; overflow: hidden; min-height: 250px; padding: 27px 30px; border-radius: 15px; background: var(--green); color: white; box-shadow: var(--shadow); }
     .hero::after { position: absolute; right: -67px; bottom: -132px; width: 310px; height: 310px; border: 1px solid rgba(255,255,255,.15); border-radius: 50%; box-shadow: 0 0 0 25px rgba(255,255,255,.035), 0 0 0 54px rgba(255,255,255,.03); content: ''; pointer-events: none; }
     .hero-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .hero-label { color: #c3d6c9; font-size: 12px; font-weight: 600; }
+    .hero-label { color: #d3e4d7; font-size: 20px; font-weight: 800; }
     .live-pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 9px; border: 1px solid rgba(255,255,255,.22); border-radius: 20px; color: #e5eee7; font-size: 10px; }
     .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #98d7a4; }
-    .hero-mileage-label { margin-top: 10px; }
-    .hero-mileage-value { display: flex; align-items: baseline; gap: 4px; color: white; font-weight: 700; white-space: nowrap; }
-    .hero-mileage-number { font-family: 'DM Mono', monospace; font-size: 18px; }
-    .hero-mileage-unit { color: #c3d6c9; font-size: 10px; }
-    .hero-bottom { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 18px; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.2); }
+    .hero-license-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,.2); }
     .plate-label { margin-bottom: 7px; color: #c3d6c9; font-size: 10px; letter-spacing: 1.2px; }
     .plate { display: inline-block; padding: 6px 11px 5px; border: 2px solid rgba(255,255,255,.8); border-radius: 5px; background: #f8f6e9; color: #27322b; font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; letter-spacing: 1.3px; }
-    .hero-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .hero-edit { flex: 0 0 auto; border-color: rgba(255,255,255,.35); background: rgba(255,255,255,.08); color: white; }
+    .hero-edit:hover { border-color: rgba(255,255,255,.7); background: rgba(255,255,255,.16); }
+    .hero-edit svg { width: 16px; height: 16px; }
+    .hero-mileage { margin-top: 16px; padding: 0 0 17px; border-bottom: 1px solid rgba(255,255,255,.2); }
+    .hero-mileage-label { margin-bottom: 2px; color: #d3e4d7; font-size: 13px; font-weight: 700; }
+    .hero-mileage-value { display: flex; align-items: baseline; gap: 8px; color: white; font-weight: 700; white-space: nowrap; }
+    .hero-mileage-number { font-family: 'DM Mono', monospace; font-size: clamp(42px, 6vw, 58px); line-height: 1.08; }
+    .hero-mileage-unit { color: #d3e4d7; font-size: 17px; }
+    .hero-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 15px; }
     .hero-fact { min-width: 0; }
-    .hero-fact-label { margin-bottom: 5px; color: #c3d6c9; font-size: 10px; white-space: nowrap; }
-    .hero-fact-value { display: block; overflow: hidden; color: white; font-size: 13px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-    .hero-edit { border-color: rgba(255,255,255,.3); background: transparent; color: white; }
-    .hero-edit:hover { border-color: rgba(255,255,255,.7); background: rgba(255,255,255,.08); }
+    .hero-fact + .hero-fact { padding-left: 18px; border-left: 1px solid rgba(255,255,255,.2); }
+    .hero-fact-label { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; color: #d3e4d7; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .hero-fact-label svg { width: 17px; height: 17px; flex: 0 0 17px; }
+    .hero-fact-value { display: block; overflow: hidden; color: white; font-size: 17px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
     .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 29px 0 13px; }
     .section-heading h2 { margin: 0; font-size: 16px; }
     .section-heading p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
@@ -176,11 +180,13 @@
       .page-heading { align-items: flex-start; flex-direction: column; gap: 8px; }
       .date-stamp { font-size: 10px; }
       .hero { min-height: 231px; padding: 22px; }
-      .hero-bottom { grid-template-columns: 1fr auto; gap: 14px; }
-      .hero-facts { grid-column: 1 / -1; grid-row: 2; padding-top: 13px; border-top: 1px solid rgba(255,255,255,.16); }
-      .hero-fact-label { font-size: 9px; }
-      .hero-fact-value { font-size: 12px; }
-      .hero-edit { grid-column: 2; grid-row: 1; }
+      .hero-label { font-size: 18px; }
+      .hero-license-row { margin-top: 15px; }
+      .hero-mileage-number { font-size: 44px; }
+      .hero-fact + .hero-fact { padding-left: 9px; }
+      .hero-fact-label { gap: 4px; font-size: 9px; }
+      .hero-fact-label svg { width: 14px; height: 14px; flex-basis: 14px; }
+      .hero-fact-value { font-size: 15px; }
       .record { grid-template-columns: 39px minmax(0, 1fr) auto; gap: 10px; padding: 13px 11px; }
       .record-index { width: 37px; height: 37px; }
       .record-meta { gap: 4px 8px; font-size: 10px; }
@@ -228,14 +234,18 @@
         <section id="maintenancePage">
           <div class="hero">
             <div class="hero-top"><div class="hero-label">車輛總覽</div><div class="live-pill"><span class="live-dot"></span>車況已更新</div></div>
-            <div class="hero-bottom">
+            <div class="hero-license-row">
               <div><div class="plate-label">LICENSE PLATE / 車牌</div><div class="plate" id="plateValue">PAB-6992</div></div>
-              <div class="hero-facts" aria-label="車輛資訊">
-                <div class="hero-fact"><div class="hero-fact-label">車名</div><strong class="hero-fact-value" id="vehicleNameValue">小白</strong><div class="hero-fact-label hero-mileage-label">目前總里程</div><strong class="hero-mileage-value"><span class="hero-mileage-number" id="mileageValue">2,000</span><span class="hero-mileage-unit">公里</span></strong></div>
-                <div class="hero-fact"><div class="hero-fact-label">最近保養</div><strong class="hero-fact-value" id="lastServiceValue">尚無紀錄</strong></div>
-                <div class="hero-fact"><div class="hero-fact-label">保養次數</div><strong class="hero-fact-value" id="serviceCountValue">0 次</strong></div>
-              </div>
-              <button class="button hero-edit small" id="editVehicleButton">編輯車輛</button>
+              <button class="button hero-edit" id="editVehicleButton"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>編輯車輛</button>
+            </div>
+            <div class="hero-mileage">
+              <div class="hero-mileage-label">目前總里程</div>
+              <div class="hero-mileage-value"><strong class="hero-mileage-number" id="mileageValue">2,000</strong><span class="hero-mileage-unit">公里</span></div>
+            </div>
+            <div class="hero-facts" aria-label="車輛資訊">
+              <div class="hero-fact"><div class="hero-fact-label">車名<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="17.5" r="3"/><circle cx="18.5" cy="17.5" r="3"/><path d="m8.5 17.5 3-7h4l3 7M7 17.5h5.5M11.5 10.5l-2-3h-3"/></svg></div><strong class="hero-fact-value" id="vehicleNameValue">小白</strong></div>
+              <div class="hero-fact"><div class="hero-fact-label">最近保養<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></div><strong class="hero-fact-value" id="lastServiceValue">尚無紀錄</strong></div>
+              <div class="hero-fact"><div class="hero-fact-label">保養次數<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a5 5 0 0 0-6.4 6.4L3 18l3 3 5.3-5.3a5 5 0 0 0 6.4-6.4l-3.1 3.1-3-3z"/></svg></div><strong class="hero-fact-value" id="serviceCountValue">0 次</strong></div>
             </div>
           </div>
           <div class="section-heading">
