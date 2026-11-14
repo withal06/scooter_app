@@ -28,8 +28,9 @@
 
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink); }
-    button, input { font: inherit; }
+    button, input, select { font: inherit; }
     button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
     .shell { max-width: 1180px; min-height: 100vh; margin: 0 auto; padding: 28px 42px 44px; }
     .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 32px; }
     .brand { display: flex; align-items: center; gap: 12px; }
@@ -112,6 +113,21 @@
     .inspection-year-label { flex: 1; }
     .inspection-year-number { color: var(--green); font-family: 'Noto Sans TC', sans-serif; font-size: 11px; font-weight: 700; white-space: nowrap; }
     .fuel-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .fuel-price-board { margin-bottom: 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 11px; background: var(--white); }
+    .fuel-price-board-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .fuel-price-board-title { font-size: 12px; font-weight: 800; }
+    .fuel-price-board-actions { display: flex; align-items: center; gap: 9px; }
+    .fuel-price-board-date { color: var(--muted); font-size: 10px; }
+    .fuel-price-refresh { min-height: 32px; padding: 0 9px; font-size: 11px; }
+    .fuel-price-refresh svg { width: 14px; height: 14px; }
+    .fuel-price-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 12px; }
+    .fuel-price-item { min-width: 0; }
+    .fuel-price-item + .fuel-price-item { padding-left: 14px; border-left: 1px solid var(--line); }
+    .fuel-price-grade { color: var(--muted); font-size: 10px; font-weight: 700; }
+    .fuel-price-value { margin-top: 4px; color: var(--green); font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; white-space: nowrap; }
+    .fuel-price-value small { margin-left: 3px; color: var(--muted); font-family: 'Noto Sans TC', sans-serif; font-size: 9px; }
+    .fuel-price-board-status { margin-top: 9px; color: var(--muted); font-size: 10px; }
+    .fuel-price-board-status.error { color: #b75237; }
     .fuel-stat { min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
     .fuel-stat-label { color: var(--muted); font-size: 11px; font-weight: 700; }
     .fuel-stat-value { margin-top: 8px; color: var(--green); font-family: 'DM Mono', monospace; font-size: clamp(18px, 2.4vw, 25px); font-weight: 500; white-space: nowrap; }
@@ -158,8 +174,11 @@
     .dialog-form { display: grid; gap: 14px; padding: 19px 21px 21px; }
     .field { display: grid; gap: 6px; }
     .field label { color: var(--muted); font-size: 11px; font-weight: 700; }
-    .field input { width: 100%; height: 42px; padding: 0 11px; border: 1px solid var(--line); border-radius: 8px; outline: 0; background: #fff; color: var(--ink); font-size: 13px; }
-    .field input:focus { border-color: #8cae95; box-shadow: 0 0 0 3px rgba(36, 92, 70, .1); }
+    .field input, .field select { width: 100%; height: 42px; padding: 0 11px; border: 1px solid var(--line); border-radius: 8px; outline: 0; background: #fff; color: var(--ink); font-size: 13px; }
+    .field input:focus, .field select:focus { border-color: #8cae95; box-shadow: 0 0 0 3px rgba(36, 92, 70, .1); }
+    .field input[readonly] { background: #f0f3ee; color: var(--green); font-weight: 700; }
+    .fuel-price-status { margin: -5px 0 0; color: var(--green); font-size: 11px; line-height: 1.5; }
+    .fuel-price-status.error { color: #b75237; }
     .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
     .form-hint { margin: -5px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
     @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -268,6 +287,15 @@
         </section>
 
         <section id="fuelPage" class="hidden">
+          <section class="fuel-price-board" aria-label="中油最新牌價">
+            <div class="fuel-price-board-head"><strong class="fuel-price-board-title">中油最新牌價</strong><div class="fuel-price-board-actions"><span class="fuel-price-board-date" id="fuelPricePublishedAt">查詢中</span><button class="button fuel-price-refresh" id="refreshFuelPricesButton" type="button" title="重新查詢中油油價"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"/></svg>更新</button></div></div>
+            <div class="fuel-price-grid">
+              <div class="fuel-price-item"><div class="fuel-price-grade">92 無鉛</div><div class="fuel-price-value"><span id="fuelPrice92">—</span><small>元/L</small></div></div>
+              <div class="fuel-price-item"><div class="fuel-price-grade">95 無鉛</div><div class="fuel-price-value"><span id="fuelPrice95">—</span><small>元/L</small></div></div>
+              <div class="fuel-price-item"><div class="fuel-price-grade">98 無鉛</div><div class="fuel-price-value"><span id="fuelPrice98">—</span><small>元/L</small></div></div>
+            </div>
+            <div class="fuel-price-board-status" id="fuelPriceOverviewStatus" role="status" aria-live="polite">查詢中油最新牌價…</div>
+          </section>
           <div class="fuel-stats" aria-label="油耗統計">
             <article class="fuel-stat"><div class="fuel-stat-label">總平均油耗</div><div class="fuel-stat-value"><span id="averageFuelEconomy">—</span><span class="fuel-stat-unit">km/L</span></div></article>
             <article class="fuel-stat"><div class="fuel-stat-label">每公里油錢</div><div class="fuel-stat-value"><span id="fuelCostPerKm">—</span><span class="fuel-stat-unit">元/km</span></div></article>
@@ -352,8 +380,11 @@
       <div class="field"><label for="fuelDate">加油日期</label><input id="fuelDate" name="date" type="date" required></div>
       <div class="field"><label for="fuelOdometer">加油時總里程（公里）</label><input id="fuelOdometer" name="odometer" type="number" min="0" step="1" placeholder="例如 3200" required></div>
       <div class="field"><label for="fuelLiters">加油量（公升）</label><input id="fuelLiters" name="liters" type="number" min="0.01" step="0.01" placeholder="例如 5" required></div>
-      <div class="field"><label for="fuelUnitPrice">每公升價格（元）</label><input id="fuelUnitPrice" name="unitPrice" type="number" min="0.01" step="0.01" placeholder="例如 29" required></div>
-      <p class="form-hint">建議每次都加滿並記錄，油耗估算才會較準確。</p>
+      <div class="field"><label for="fuelGrade">油品</label><select id="fuelGrade" name="grade" required><option value="92">92 無鉛</option><option value="95" selected>95 無鉛</option><option value="98">98 無鉛</option><option value="legacy">未記錄油品（舊紀錄）</option></select></div>
+      <div class="field"><label for="fuelAmount">加油金額（元）</label><input id="fuelAmount" name="amount" type="number" min="1" step="1" placeholder="依油價自動試算，可調整" required></div>
+      <input id="fuelUnitPrice" name="unitPrice" type="hidden">
+      <p class="fuel-price-status" id="fuelPriceStatus" role="status" aria-live="polite">查詢中油最新牌價…</p>
+      <p class="form-hint">每公升油價僅供參考，請依收據核對加油總價；網路查不到牌價時仍可輸入總價儲存。建議每次加滿以提升油耗估算準確度。</p>
       <div class="form-actions"><button class="button" type="button" data-close="fuelDialog">取消</button><button class="button primary" type="submit">儲存紀錄</button></div>
     </form>
   </dialog>
@@ -398,6 +429,10 @@
       let editingMaintenanceId = null;
       let editingInspectionId = null;
       let editingFuelId = null;
+      let fuelPriceRequestId = 0;
+      let fuelPriceCache = null;
+      let fuelPriceCacheAt = 0;
+      let fuelPricePromise = null;
       let pendingImportMode = 'maintenance';
       const documentUrls = {};
 
@@ -460,6 +495,11 @@
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       }
 
+      function getFuelAmount(item) {
+        const amount = Number(item.amount);
+        return Number.isFinite(amount) && amount > 0 ? amount : Number(item.liters || 0) * Number(item.unitPrice || 0);
+      }
+
       function renderFuelPerformanceChart(sortedFuel) {
         const container = document.getElementById('fuelPerformanceChart');
         if (!sortedFuel.length) {
@@ -474,7 +514,7 @@
           const liters = Number(item.liters);
           return {
             ...item,
-            cost: liters * Number(item.unitPrice),
+            cost: getFuelAmount(item),
             economy: distance > 0 && liters > 0 ? distance / liters : null
           };
         });
@@ -576,11 +616,11 @@
 
         const sortedFuel = [...state.fuel].sort((a, b) => a.date.localeCompare(b.date) || a.odometer - b.odometer);
         const totalLiters = sortedFuel.reduce((total, item) => total + Number(item.liters), 0);
-        const totalCost = sortedFuel.reduce((total, item) => total + Number(item.liters) * Number(item.unitPrice), 0);
+        const totalCost = sortedFuel.reduce((total, item) => total + getFuelAmount(item), 0);
         const intervals = sortedFuel.slice(1).map((item, index) => ({
           distance: Number(item.odometer) - Number(sortedFuel[index].odometer),
           liters: Number(item.liters),
-          cost: Number(item.liters) * Number(item.unitPrice)
+          cost: getFuelAmount(item)
         })).filter(item => item.distance > 0 && item.liters > 0);
         const measuredDistance = intervals.reduce((total, item) => total + item.distance, 0);
         const measuredLiters = intervals.reduce((total, item) => total + item.liters, 0);
@@ -597,13 +637,119 @@
           const distance = previous ? Number(item.odometer) - Number(previous.odometer) : null;
           const economy = distance > 0 && Number(item.liters) > 0 ? `${(distance / Number(item.liters)).toFixed(1)} km/L` : '起算紀錄';
           const ordinalNumber = index + 1;
+          const gradeLabel = ['92', '95', '98'].includes(String(item.grade)) ? `${item.grade} 無鉛 · ` : '';
+          const unitPriceLabel = Number(item.unitPrice) > 0 ? `${Number(item.unitPrice).toFixed(1)} 元/L` : '未取得牌價';
+          const amount = getFuelAmount(item);
           return `
             <article class="record" style="animation-delay:${reverseIndex * 45}ms">
               <div class="record-index">加油${ordinalNumber}</div>
-              <div><div class="record-title">${Number(item.liters).toFixed(1)} 公升 · ${Number(item.unitPrice).toFixed(1)} 元/L</div><div class="record-meta"><span>${formatDate(item.date)}</span><span>里程 ${Number(item.odometer).toLocaleString('en-US')} km</span><span>單次油耗 ${economy}</span><span>合計 ${(Number(item.liters) * Number(item.unitPrice)).toFixed(0)} 元</span></div></div>
+              <div><div class="record-title">${gradeLabel}${Number(item.liters).toFixed(1)} 公升 · ${unitPriceLabel}</div><div class="record-meta"><span>${formatDate(item.date)}</span><span>里程 ${Number(item.odometer).toLocaleString('en-US')} km</span><span>單次油耗 ${economy}</span><span>加油金額 ${amount.toFixed(0)} 元</span></div></div>
               <div style="display:flex;align-items:center;gap:4px"><button class="delete-button edit-button" data-edit-fuel="${escapeHtml(item.id)}" aria-label="編輯加油紀錄" title="編輯紀錄">✎</button><button class="delete-button" data-delete-fuel="${escapeHtml(item.id)}" aria-label="刪除加油紀錄" title="刪除紀錄">×</button></div>
             </article>`;
         }).join('') : '<div class="empty-state">目前還沒有加油紀錄，新增一筆開始計算油耗。</div>';
+      }
+
+      function fetchFuelPrices(forceRefresh = false) {
+        if (!forceRefresh && fuelPriceCache && Date.now() - fuelPriceCacheAt < 3600000) return Promise.resolve(fuelPriceCache);
+        if (!fuelPricePromise) {
+          const endpoint = forceRefresh ? '/api/fuel-prices?refresh=1' : '/api/fuel-prices';
+          fuelPricePromise = fetch(endpoint, { cache: 'no-store' })
+            .then(async response => {
+              const data = await response.json();
+              if (!response.ok) throw new Error(data.error || '無法取得中油牌價');
+              if (!data.prices || !['92', '95', '98'].every(grade => Number.isFinite(Number(data.prices[grade])) && Number(data.prices[grade]) > 0)) {
+                throw new Error('中油公告沒有完整的汽油價格');
+              }
+              fuelPriceCache = data;
+              fuelPriceCacheAt = Date.now();
+              return data;
+            })
+            .finally(() => { fuelPricePromise = null; });
+        }
+        return fuelPricePromise;
+      }
+
+      async function loadFuelPriceOverview(forceRefresh = false) {
+        const status = document.getElementById('fuelPriceOverviewStatus');
+        const publishedAt = document.getElementById('fuelPricePublishedAt');
+        const refreshButton = document.getElementById('refreshFuelPricesButton');
+        status.classList.remove('error');
+        status.textContent = '正在查詢中油最新牌價…';
+        publishedAt.textContent = '查詢中';
+        refreshButton.disabled = true;
+        ['92', '95', '98'].forEach(grade => { document.getElementById(`fuelPrice${grade}`).textContent = '—'; });
+        try {
+          const data = await fetchFuelPrices(forceRefresh);
+          ['92', '95', '98'].forEach(grade => { document.getElementById(`fuelPrice${grade}`).textContent = Number(data.prices[grade]).toFixed(1); });
+          publishedAt.textContent = `公告 ${formatDate(data.publishedAt)}`;
+          status.textContent = '資料來源：台灣中油官方公告';
+        } catch (error) {
+          publishedAt.textContent = '暫時無法更新';
+          const errorMessage = error.message || '';
+          const isNetworkError = error instanceof TypeError || /failed to fetch|networkerror|load failed/i.test(errorMessage);
+          const detail = errorMessage && !isNetworkError ? `（${errorMessage}）` : '';
+          status.textContent = `無法連線查詢油價，請確認網路後按「更新」重試。${detail}`;
+          status.classList.add('error');
+        } finally {
+          refreshButton.disabled = false;
+        }
+      }
+
+      function updateFuelAmount(force = false) {
+        const amountInput = document.getElementById('fuelAmount');
+        if (!force && amountInput.dataset.manual === 'true') return;
+        const liters = Number(document.getElementById('fuelLiters').value);
+        const unitPrice = Number(document.getElementById('fuelUnitPrice').value);
+        amountInput.value = liters > 0 && unitPrice > 0 ? (liters * unitPrice).toFixed(0) : '';
+        if (force) amountInput.dataset.manual = 'false';
+      }
+
+      async function loadFuelPriceForGrade() {
+        const requestId = ++fuelPriceRequestId;
+        const grade = document.getElementById('fuelGrade').value;
+        const priceInput = document.getElementById('fuelUnitPrice');
+        const status = document.getElementById('fuelPriceStatus');
+        const submitButton = document.querySelector('#fuelForm button[type="submit"]');
+        status.classList.remove('error');
+        status.textContent = '正在查詢中油最新牌價…';
+        if (grade === 'legacy') {
+          const record = state.fuel.find(item => item.id === editingFuelId);
+          if (!record) {
+            priceInput.value = '';
+            document.getElementById('fuelAmount').value = '';
+            status.textContent = '新紀錄請選擇 92、95 或 98 無鉛';
+            status.classList.add('error');
+            submitButton.disabled = true;
+            return;
+          }
+          priceInput.value = Number(record.unitPrice) > 0 ? record.unitPrice : '';
+          updateFuelAmount();
+          status.textContent = Number(record.unitPrice) > 0 ? `舊紀錄沿用原單價 ${Number(record.unitPrice).toFixed(1)} 元／公升` : '舊紀錄沒有單價；請依收據輸入加油總價。';
+          submitButton.disabled = false;
+          return;
+        }
+        submitButton.disabled = false;
+        document.getElementById('fuelAmount').dataset.manual = 'false';
+        priceInput.value = '';
+        priceInput.dataset.publishedAt = '';
+        document.getElementById('fuelAmount').value = '';
+
+        try {
+          const data = await fetchFuelPrices();
+          const price = Number(data.prices?.[grade]);
+          if (!Number.isFinite(price) || price <= 0) throw new Error('中油公告沒有這個油品的價格');
+          if (requestId !== fuelPriceRequestId) return;
+          priceInput.value = price.toFixed(1);
+          priceInput.dataset.publishedAt = data.publishedAt || '';
+          if (document.getElementById('fuelAmount').dataset.manual !== 'true') updateFuelAmount(true);
+          status.textContent = `中油公告 ${formatDate(data.publishedAt)} · ${grade} 無鉛 ${price.toFixed(1)} 元／公升`;
+          submitButton.disabled = false;
+        } catch (error) {
+          if (requestId !== fuelPriceRequestId) return;
+          status.textContent = '無法取得每公升牌價；每公升價格僅供參考，仍可依收據輸入加油總價儲存。';
+          status.classList.add('error');
+          submitButton.disabled = false;
+        }
       }
 
       function openDialog(id, recordId = null) {
@@ -624,13 +770,23 @@
           document.getElementById('inspectionDate').value = record?.date || todayIso();
         }
         if (id === 'fuelDialog') {
+          fuelPriceRequestId += 1;
           const record = state.fuel.find(item => item.id === recordId);
           editingFuelId = record?.id || null;
           document.getElementById('fuelDialogTitle').textContent = record ? '編輯加油紀錄' : '新增加油紀錄';
           document.getElementById('fuelDate').value = record?.date || todayIso();
           document.getElementById('fuelOdometer').value = record?.odometer ?? '';
           document.getElementById('fuelLiters').value = record?.liters ?? 5;
-          document.getElementById('fuelUnitPrice').value = record?.unitPrice ?? 29;
+          document.getElementById('fuelGrade').value = record ? (['92', '95', '98'].includes(String(record.grade)) ? String(record.grade) : 'legacy') : '95';
+          document.getElementById('fuelUnitPrice').value = record?.unitPrice ?? '';
+          document.getElementById('fuelUnitPrice').dataset.publishedAt = '';
+          const fuelAmount = document.getElementById('fuelAmount');
+          fuelAmount.value = record ? getFuelAmount(record).toFixed(0) : '';
+          fuelAmount.dataset.manual = record?.amount ? 'true' : 'false';
+          const priceStatus = document.getElementById('fuelPriceStatus');
+          priceStatus.classList.remove('error');
+          priceStatus.textContent = record ? '沿用這筆紀錄儲存的牌價；更換油品時會自動查詢最新價格。' : '正在查詢中油最新牌價…';
+          document.querySelector('#fuelForm button[type="submit"]').disabled = false;
         }
         if (id === 'vehicleDialog') {
           document.getElementById('vehicleName').value = state.vehicle.name;
@@ -638,6 +794,7 @@
           document.getElementById('vehicleMileage').value = state.vehicle.mileage;
         }
         dialog.showModal();
+        if (id === 'fuelDialog' && !editingFuelId) loadFuelPriceForGrade();
       }
 
       function switchTab(tab) {
@@ -653,6 +810,7 @@
         const csvActions = document.querySelector('.top-actions');
         const showCsvActions = tab === 'maintenance' || fuel;
         csvActions.classList.toggle('hidden', !showCsvActions);
+        if (fuel) loadFuelPriceOverview();
         pendingImportMode = fuel ? 'fuel' : 'maintenance';
         const csvTypeLabel = fuel ? '油耗' : '保養';
         document.querySelector('#importButton .csv-button-label').textContent = `匯入${csvTypeLabel} CSV`;
@@ -769,8 +927,8 @@
       }
 
       function exportFuelCsv() {
-        const rows = [['車名', '車牌', '日期', '總里程(公里)', '加油量(公升)', '單價(元/公升)']];
-        state.fuel.forEach(item => rows.push([state.vehicle.name, state.vehicle.plate, item.date.replace(/-/g, '/'), item.odometer, item.liters, item.unitPrice]));
+        const rows = [['車名', '車牌', '日期', '總里程(公里)', '加油量(公升)', '單價(元/公升)', '油品', '加油金額(元)']];
+        state.fuel.forEach(item => rows.push([state.vehicle.name, state.vehicle.plate, item.date.replace(/-/g, '/'), item.odometer, item.liters, item.unitPrice, item.grade || '', getFuelAmount(item)]));
         downloadCsv(rows, `小白油耗紀錄_${todayIso()}.csv`, '油耗 CSV 已匯出');
       }
 
@@ -874,9 +1032,10 @@
           const rows = parseCsv(await file.text());
           const header = rows.shift()?.map(value => value.trim());
           const legacyCombined = header && isLegacyFuelCsvHeader(header);
-          const dedicatedFuel = header?.length === 6 &&
+          const dedicatedFuel = [6, 7, 8].includes(header?.length) &&
             header[0] === '車名' && header[1] === '車牌' && header[2] === '日期' &&
-            header[3] === '總里程(公里)' && header[4] === '加油量(公升)' && header[5] === '單價(元/公升)';
+            header[3] === '總里程(公里)' && header[4] === '加油量(公升)' && header[5] === '單價(元/公升)' &&
+            (header.length === 6 || (header[6] === '油品' && (header.length === 7 || header[7] === '加油金額(元)')));
           if (!header || (!legacyCombined && !dedicatedFuel)) throw new Error('這不是油耗 CSV，請選擇油耗紀錄匯出的 CSV 檔案');
           if (!rows.length) throw new Error('CSV 沒有任何資料');
           const fuel = [];
@@ -885,20 +1044,27 @@
             let rawMileage;
             let rawLiters;
             let rawUnitPrice;
+            let rawGrade = '';
+            let rawAmount = '';
             if (legacyCombined) {
               if (row[0] !== '加油') return;
               [, , , , rawDate, rawMileage, , , rawLiters, rawUnitPrice] = row;
             } else {
-              [, , rawDate, rawMileage, rawLiters, rawUnitPrice] = row;
+              [, , rawDate, rawMileage, rawLiters, rawUnitPrice, rawGrade] = row;
+              if (header.length === 8) rawAmount = row[7];
             }
             const date = normalizeDate(rawDate);
             const odometer = Number(rawMileage);
             const liters = Number(rawLiters);
             const unitPrice = Number(rawUnitPrice);
-            if (!date || !Number.isFinite(odometer) || odometer < 0 || !Number.isFinite(liters) || liters <= 0 || !Number.isFinite(unitPrice) || unitPrice <= 0) {
+            const amount = rawAmount?.trim() ? Number(rawAmount) : undefined;
+            const hasAmount = amount !== undefined && Number.isFinite(amount) && amount > 0;
+            if (!date || !Number.isFinite(odometer) || odometer < 0 || !Number.isFinite(liters) || liters <= 0 || !Number.isFinite(unitPrice) || (unitPrice < 0) || (unitPrice === 0 && !hasAmount) || (amount !== undefined && (!Number.isFinite(amount) || amount <= 0))) {
               throw new Error(`第 ${index + 2} 列加油資料錯誤`);
             }
-            fuel.push({ id: `f-${Date.now()}-${index}`, date, odometer, liters, unitPrice });
+            const grade = String(rawGrade || '').trim();
+            if (grade && !['92', '95', '98'].includes(grade)) throw new Error(`第 ${index + 2} 列油品必須是 92、95 或 98 無鉛`);
+            fuel.push({ id: `f-${Date.now()}-${index}`, date, odometer, liters, unitPrice, grade: grade || undefined, amount });
           });
           if (!fuel.length) throw new Error('CSV 中沒有加油紀錄');
           const orderedFuel = [...fuel].sort((a, b) => a.date.localeCompare(b.date) || a.odometer - b.odometer);
@@ -920,6 +1086,10 @@
       document.getElementById('addMaintenanceButton').addEventListener('click', () => openDialog('maintenanceDialog'));
       document.getElementById('addInspectionButton').addEventListener('click', () => openDialog('inspectionDialog'));
       document.getElementById('addFuelButton').addEventListener('click', () => openDialog('fuelDialog'));
+      document.getElementById('fuelGrade').addEventListener('change', loadFuelPriceForGrade);
+      document.getElementById('fuelLiters').addEventListener('input', () => updateFuelAmount(true));
+      document.getElementById('fuelAmount').addEventListener('input', event => { event.target.dataset.manual = 'true'; });
+      document.getElementById('refreshFuelPricesButton').addEventListener('click', () => loadFuelPriceOverview(true));
       document.getElementById('editVehicleButton').addEventListener('click', () => openDialog('vehicleDialog'));
       document.getElementById('exportButton').addEventListener('click', () => {
         if (pendingImportMode === 'fuel') exportFuelCsv();
@@ -991,10 +1161,13 @@
           date: String(form.get('date')),
           odometer: Number(form.get('odometer')),
           liters: Number(form.get('liters')),
-          unitPrice: Number(form.get('unitPrice'))
+          unitPrice: Number(form.get('unitPrice')),
+          amount: Number(form.get('amount')),
+          grade: ['92', '95', '98'].includes(String(form.get('grade'))) ? String(form.get('grade')) : undefined
         };
-        if (!record.date || !Number.isFinite(record.odometer) || record.odometer < 0 || !Number.isFinite(record.liters) || record.liters <= 0 || !Number.isFinite(record.unitPrice) || record.unitPrice <= 0) {
-          showToast('請輸入有效的加油日期、里程、油量與單價');
+        const legacyGrade = editingFuelId && form.get('grade') === 'legacy';
+        if (!record.date || !Number.isFinite(record.odometer) || record.odometer < 0 || !Number.isFinite(record.liters) || record.liters <= 0 || !Number.isFinite(record.unitPrice) || record.unitPrice < 0 || !Number.isFinite(record.amount) || record.amount <= 0 || (record.unitPrice === 0 && !editingFuelId && !record.grade) || (!record.grade && !legacyGrade)) {
+          showToast('請確認加油日期、里程、油量及加油總金額');
           return;
         }
         const orderedFuel = [...state.fuel.filter(item => item.id !== editingFuelId), record]
@@ -1043,6 +1216,7 @@
 
       render();
       renderDocuments();
+      loadFuelPriceOverview(true);
     })();
   </script>
 </body>
